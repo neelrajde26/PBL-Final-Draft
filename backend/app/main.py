@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import districts, health, satellite
+from app.api.routes import districts, gee, health, satellite
 from app.core.config import settings
 
 
@@ -27,6 +27,7 @@ app.add_middleware(
 app.include_router(health.router, prefix=settings.api_prefix)
 app.include_router(districts.router, prefix=settings.api_prefix)
 app.include_router(satellite.router, prefix=settings.api_prefix)
+app.include_router(gee.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

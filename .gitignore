@@ -14,6 +14,7 @@ node_modules/
 dist/
 build/
 *.log
+*.tsbuildinfo
 *.pem
 *.key
 *service-account*.json
@@ -24,3 +25,7 @@ gee-setup/
 source-a/
 source-b/
 audit-artifacts/
+
+# Locally acquired boundary geometry may have source-specific redistribution terms.
+backend/data/boundaries/local/
+.taste-skill/

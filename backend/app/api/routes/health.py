@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Query
 
+from app.db import database
 from app.services.gee.gee_client import gee_client
 
 
@@ -12,6 +13,18 @@ def health() -> dict[str, object]:
         "status": "ok",
         "service": "Maharashtra Drought Intelligence System API",
         "gee": gee_client.health(verify_remote=False).to_dict(),
+    }
+
+
+@router.get("/ready")
+def readiness() -> dict[str, object]:
+    database_health = database.health()
+    gee_health = gee_client.health(verify_remote=False)
+    ready = database_health.available
+    return {
+        "status": "ready" if ready else "not_ready",
+        "database": database_health.to_dict(),
+        "gee": gee_health.to_dict(),
     }
 
 

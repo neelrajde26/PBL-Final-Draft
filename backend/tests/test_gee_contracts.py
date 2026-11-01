@@ -25,6 +25,9 @@ def test_native_cadence_is_not_coerced_to_daily() -> None:
     assert COLLECTIONS["modis_vi"].temporal_resolution == TemporalResolution.SIXTEEN_DAY
     assert COLLECTIONS["modis_et"].temporal_resolution == TemporalResolution.EIGHT_DAY
     assert COLLECTIONS["grace_mascon_cri"].temporal_resolution == TemporalResolution.MONTHLY
+    assert COLLECTIONS["modis_vi"].nominal_period_value == 16
+    assert COLLECTIONS["modis_lst"].nominal_period_value == 8
+    assert COLLECTIONS["gldas_noah"].nominal_period_unit == "hour"
 
 
 def test_point_or_buffer_substitute_is_rejected() -> None:

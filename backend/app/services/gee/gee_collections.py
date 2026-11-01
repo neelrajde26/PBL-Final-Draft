@@ -33,6 +33,8 @@ class CollectionSpec:
     native_scale_m: int
     start_date: str
     bands: tuple[BandSpec, ...]
+    nominal_period_value: int
+    nominal_period_unit: str
     quality_band: str | None = None
     notes: str = ""
 
@@ -54,6 +56,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
         native_scale_m=5566,
         start_date="1981-01-01",
         bands=(BandSpec("precipitation", "rainfall", "mm/day", aggregation="sum"),),
+        nominal_period_value=1,
+        nominal_period_unit="day",
         notes="The catalog asset is CHIRPS v2 Final, not CHIRPS v3.",
     ),
     "modis_vi": CollectionSpec(
@@ -67,6 +71,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("NDVI", "ndvi", "index", scale=0.0001),
             BandSpec("EVI", "evi", "index", scale=0.0001),
         ),
+        nominal_period_value=16,
+        nominal_period_unit="day",
         quality_band="SummaryQA",
     ),
     "modis_lst": CollectionSpec(
@@ -80,6 +86,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("LST_Day_1km", "lst_day", "degC", scale=0.02, offset=-273.15),
             BandSpec("LST_Night_1km", "lst_night", "degC", scale=0.02, offset=-273.15),
         ),
+        nominal_period_value=8,
+        nominal_period_unit="day",
         quality_band="QC_Day/QC_Night",
     ),
     "modis_et": CollectionSpec(
@@ -90,6 +98,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
         native_scale_m=500,
         start_date="2021-01-01",
         bands=(BandSpec("ET", "et", "kg/m2/composite", scale=0.1, aggregation="sum"),),
+        nominal_period_value=8,
+        nominal_period_unit="day",
         quality_band="ET_QC",
         notes="Use MOD16A2GF for historical gap-filled ET; use this near real time.",
     ),
@@ -101,6 +111,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
         native_scale_m=500,
         start_date="2000-01-01",
         bands=(BandSpec("ET", "et", "kg/m2/composite", scale=0.1, aggregation="sum"),),
+        nominal_period_value=8,
+        nominal_period_unit="day",
         quality_band="ET_QC",
         notes="Year-end product; not appropriate as a current-year live feed.",
     ),
@@ -120,6 +132,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("Qs_acc", "surface_runoff", "kg/m2/3h", aggregation="sum"),
             BandSpec("Evap_tavg", "evapotranspiration_rate", "kg/m2/s"),
         ),
+        nominal_period_value=3,
+        nominal_period_unit="hour",
     ),
     "era5_land_daily": CollectionSpec(
         key="era5_land_daily",
@@ -135,6 +149,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("volumetric_soil_water_layer_1", "soil_water_layer_1", "m3/m3"),
             BandSpec("volumetric_soil_water_layer_2", "soil_water_layer_2", "m3/m3"),
         ),
+        nominal_period_value=1,
+        nominal_period_unit="day",
         notes="Flow bands may contain small negative packing artifacts; QC must flag them.",
     ),
     "smap_l3": CollectionSpec(
@@ -148,6 +164,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("soil_moisture_am", "soil_moisture_am", "m3/m3"),
             BandSpec("soil_moisture_pm", "soil_moisture_pm", "m3/m3"),
         ),
+        nominal_period_value=1,
+        nominal_period_unit="day",
         quality_band="retrieval_qual_flag_am/retrieval_qual_flag_pm",
         notes="Mission sampling is typically every 2-3 days despite daily composite assets.",
     ),
@@ -164,6 +182,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("B4", "red", "reflectance", scale=0.0001),
             BandSpec("B8", "nir", "reflectance", scale=0.0001),
         ),
+        nominal_period_value=0,
+        nominal_period_unit="hour",
         quality_band="SCL",
         notes="SCL masking is used because QA60 availability changed over time.",
     ),
@@ -179,6 +199,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("VH", "vh", "dB"),
             BandSpec("angle", "incidence_angle", "degrees"),
         ),
+        nominal_period_value=0,
+        nominal_period_unit="hour",
         notes="Backscatter is a moisture/land-condition proxy, not direct soil moisture.",
     ),
     "grace_mascon_cri": CollectionSpec(
@@ -192,6 +214,8 @@ COLLECTIONS: dict[str, CollectionSpec] = {
             BandSpec("lwe_thickness", "terrestrial_water_storage_anomaly", "cm"),
             BandSpec("uncertainty", "uncertainty", "cm"),
         ),
+        nominal_period_value=1,
+        nominal_period_unit="month",
         notes=(
             "Underlying mascons are about 3 degrees; the 0.5-degree grid does not provide "
             "independent district-scale groundwater measurements."

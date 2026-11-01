@@ -22,35 +22,29 @@ class GeeProcessor:
         self.client = client
 
     @staticmethod
-    def _scaled_band(image: Any, band: BandSpec) -> Any:
-        return (
+    def _scaled_band(image: Any, band: BandSpec, mask: Any | None = None) -> Any:
+        scaled = (
             image.select(band.source_band)
             .multiply(band.scale)
             .add(band.offset)
             .rename(band.output_band)
         )
+        return scaled.updateMask(mask) if mask is not None else scaled
 
     def _mask_and_transform(self, spec: CollectionSpec, image: Any) -> Any:
         key = spec.key
 
+        common_mask = None
         if key == "modis_vi":
-            image = image.updateMask(image.select("SummaryQA").lte(1))
-        elif key == "modis_lst":
-            day_ok = image.select("QC_Day").bitwiseAnd(3).lte(1)
-            night_ok = image.select("QC_Night").bitwiseAnd(3).lte(1)
-            image = image.updateMask(day_ok.And(night_ok))
+            common_mask = image.select("SummaryQA").lte(1)
         elif key in {"modis_et", "modis_et_gap_filled"}:
             qc = image.select("ET_QC")
-            image = image.updateMask(qc.bitwiseAnd(1).eq(0)).updateMask(
+            common_mask = qc.bitwiseAnd(1).eq(0).And(
                 qc.rightShift(5).bitwiseAnd(7).lte(1)
             )
-        elif key == "smap_l3":
-            am_ok = image.select("retrieval_qual_flag_am").eq(0)
-            pm_ok = image.select("retrieval_qual_flag_pm").eq(0)
-            image = image.updateMask(am_ok.And(pm_ok))
         elif key == "sentinel2_sr":
             scl = image.select("SCL")
-            valid = (
+            common_mask = (
                 scl.neq(0)
                 .And(scl.neq(1))
                 .And(scl.neq(3))
@@ -60,11 +54,21 @@ class GeeProcessor:
                 .And(scl.neq(10))
                 .And(scl.neq(11))
             )
-            image = image.updateMask(valid)
 
         output = None
         for band in spec.bands:
-            scaled = self._scaled_band(image, band)
+            band_mask = common_mask
+            if key == "modis_lst":
+                quality_band = "QC_Day" if band.output_band == "lst_day" else "QC_Night"
+                band_mask = image.select(quality_band).bitwiseAnd(3).lte(1)
+            elif key == "smap_l3":
+                quality_band = (
+                    "retrieval_qual_flag_am"
+                    if band.output_band == "soil_moisture_am"
+                    else "retrieval_qual_flag_pm"
+                )
+                band_mask = image.select(quality_band).eq(0)
+            scaled = self._scaled_band(image, band, band_mask)
             output = scaled if output is None else output.addBands(scaled)
 
         if key == "sentinel2_sr":
@@ -84,7 +88,17 @@ class GeeProcessor:
         elif key == "sentinel1_grd":
             output = output.addBands(output.select("vv").subtract(output.select("vh")).rename("vv_vh_db"))
 
-        return output.copyProperties(image, image.propertyNames())
+        if key == "era5_land_daily":
+            output = output.set("mdis:flow_band_artifact_warning", True)
+
+        return output.copyProperties(image, image.propertyNames()).set(
+            {
+                "mdis:collection_key": spec.key,
+                "mdis:collection_id": spec.collection_id,
+                "mdis:native_temporal_resolution": spec.temporal_resolution.value,
+                "mdis:native_scale_m": spec.native_scale_m,
+            }
+        )
 
     def prepared_collection(
         self,
@@ -106,6 +120,17 @@ class GeeProcessor:
                 .filter(ee.Filter.listContains("transmitterReceiverPolarisation", "VH"))
             )
         return spec, collection.map(lambda image: self._mask_and_transform(spec, image))
+
+    def native_collection(
+        self,
+        collection_key: str,
+        start_date: str,
+        end_date: str,
+        geometry: Any | None = None,
+    ) -> tuple[CollectionSpec, Any]:
+        """Return one transformed image for each genuine source acquisition."""
+
+        return self.prepared_collection(collection_key, start_date, end_date, geometry)
 
     def composite(
         self,

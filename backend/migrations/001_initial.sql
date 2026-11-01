@@ -1,9 +1,11 @@
-BEGIN;
-
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 CREATE EXTENSION IF NOT EXISTS postgis;
-CREATE EXTENSION IF NOT EXISTS timescaledb;
 
+CREATE TABLE IF NOT EXISTS schema_migrations (
+    version text PRIMARY KEY,
+    checksum_sha256 text NOT NULL,
+    applied_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE TABLE districts (
     id text PRIMARY KEY,
     code text NOT NULL UNIQUE,
@@ -80,12 +82,27 @@ CREATE TABLE environmental_observations (
     ingested_at timestamptz NOT NULL DEFAULT now(),
     PRIMARY KEY (id, observation_time),
     UNIQUE (district_id, data_source_id, variable_key, observation_time, boundary_id)
-);
-SELECT create_hypertable(
-    'environmental_observations',
-    by_range('observation_time'),
-    if_not_exists => TRUE
-);
+) PARTITION BY RANGE (observation_time);
+
+DO $$
+DECLARE
+    partition_year integer;
+BEGIN
+    FOR partition_year IN 2000..2035 LOOP
+        EXECUTE format(
+            'CREATE TABLE IF NOT EXISTS environmental_observations_y%s '
+            'PARTITION OF environmental_observations '
+            'FOR VALUES FROM (%L) TO (%L)',
+            partition_year,
+            make_date(partition_year, 1, 1),
+            make_date(partition_year + 1, 1, 1)
+        );
+    END LOOP;
+END
+$$;
+
+CREATE TABLE environmental_observations_default
+    PARTITION OF environmental_observations DEFAULT;
 CREATE INDEX environmental_observations_lookup_idx
     ON environmental_observations (district_id, variable_key, observation_time DESC);
 
@@ -286,6 +303,4 @@ CREATE TABLE audit_logs (
     details jsonb NOT NULL DEFAULT '{}',
     created_at timestamptz NOT NULL DEFAULT now()
 );
-
-COMMIT;
 
