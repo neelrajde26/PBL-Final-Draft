@@ -1,0 +1,26 @@
+.env
+.env.*
+!.env.example
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+node_modules/
+.next/
+dist/
+build/
+*.log
+*.pem
+*.key
+*service-account*.json
+*credentials*.json
+
+# Local credentials, virtual environments, extracted audit inputs, and test output.
+gee-setup/
+source-a/
+source-b/
+audit-artifacts/
