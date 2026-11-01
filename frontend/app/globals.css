@@ -123,6 +123,18 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: 50%;
   background: var(--aqua);
 }
+.service-health { display: flex; align-items: center; gap: 14px; padding-top: 5px; color: var(--secondary); font-size: 12px; }
+.service-health span { display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; }
+.service-health span::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--subtle); }
+.service-health .service-up::before { background: var(--aqua); }
+.service-health .service-down::before { background: var(--negative); }
+.service-health button, .domain-error button, .route-error button { min-height: 34px; padding: 0 12px; color: var(--text); background: transparent; border: 1px solid var(--control); border-radius: 4px; cursor: pointer; }
+.service-health button:hover, .domain-error button:hover, .route-error button:hover { background: var(--hover); }
+.domain-error { min-height: 66px; display: flex; align-items: center; justify-content: space-between; gap: 18px; margin: 0 0 18px; padding: 12px 16px; background: var(--surface); border: 1px solid var(--negative); border-radius: var(--radius-card); }
+.domain-error strong { font-size: 13px; }
+.domain-error p { margin: 2px 0 0; color: var(--secondary); font-size: 12px; }
+.district-inspector .domain-error { display: block; margin: auto 0 0; }
+.district-inspector .domain-error button { margin-top: 10px; }
 
 .metric-strip {
   display: grid;
@@ -162,8 +174,13 @@ button, a { -webkit-tap-highlight-color: transparent; }
   border-radius: var(--radius-card);
   overflow: hidden;
 }
+.map-container { position: relative; min-width: 0; min-height: 530px; }
 .district-map, .map-loading { min-height: 530px; width: 100%; background: var(--ground); }
 .map-loading { display: grid; place-items: center; color: var(--secondary); }
+.map-error { position: absolute; inset: auto 16px 16px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--negative); border-radius: 4px; }
+.map-error strong { font-size: 13px; }
+.map-error p { margin: 3px 0 10px; color: var(--secondary); font-size: 12px; }
+.map-error button { min-height: 34px; padding: 0 12px; color: var(--text); background: transparent; border: 1px solid var(--control); border-radius: 4px; cursor: pointer; }
 .district-map .maplibregl-ctrl-group { background: var(--surface); border: 1px solid var(--border); box-shadow: none; }
 .district-map .maplibregl-ctrl button { width: 34px; height: 34px; }
 .district-map .maplibregl-ctrl-icon { filter: invert(1); opacity: .75; }
@@ -228,6 +245,9 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .method-page section { display: grid; grid-template-columns: 240px 1fr; gap: 50px; padding: 32px 0; border-top: 1px solid var(--border); }
 .method-page section h2 { margin: 0; font-size: 18px; }
 .method-page section p { max-width: 650px; margin: 0; color: var(--secondary); font-size: 16px; line-height: 1.65; }
+.route-error, .route-loading { min-height: 100vh; display: grid; place-content: center; justify-items: start; gap: 12px; padding: 24px; }
+.route-error h1, .route-loading h1 { margin: 0; font-size: 28px; }
+.route-error p, .route-loading p { max-width: 620px; margin: 0; color: var(--secondary); }
 
 @media (max-width: 1040px) {
   .metric-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -255,6 +275,7 @@ button, a { -webkit-tap-highlight-color: transparent; }
   .page-header { min-height: 0; display: block; }
   .page-header h1 { max-width: 330px; font-size: 23px; }
   .header-status { margin-top: 18px; }
+  .service-health { margin-top: 18px; flex-wrap: wrap; }
   .metric-strip { margin-top: 26px; margin-bottom: 34px; }
   .metric-strip > div { padding: 15px; }
   .metric-strip strong { font-size: 21px; }

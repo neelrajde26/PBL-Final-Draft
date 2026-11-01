@@ -57,8 +57,8 @@ def list_districts(region: str | None = None) -> dict[str, object]:
     districts = [district for district in DISTRICTS if region is None or district.region == region]
     try:
         boundaries = _boundary_metadata(district.id for district in districts)
-    except SQLAlchemyError:
-        boundaries = {}
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="District boundary database is unavailable") from exc
     return {
         "count": len(districts),
         "items": [_public(district, boundaries.get(district.id)) for district in districts],
@@ -122,8 +122,8 @@ def district_detail(district_id: str) -> dict[str, object]:
         raise HTTPException(status_code=404, detail="District not found")
     try:
         boundary = _boundary_metadata([district.id]).get(district.id)
-    except SQLAlchemyError:
-        boundary = None
+    except SQLAlchemyError as exc:
+        raise HTTPException(status_code=503, detail="District boundary database is unavailable") from exc
     return _public(district, boundary)
 
 

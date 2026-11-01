@@ -1,6 +1,32 @@
 import { z } from "zod";
 
-const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://127.0.0.1:8000/api";
+const DEFAULT_DEVELOPMENT_API = "http://127.0.0.1:8000/api";
+const DEFAULT_TIMEOUT_MS = 8_000;
+
+export class ApiRequestError extends Error {
+  constructor(
+    message: string,
+    readonly path: string,
+    readonly status: number | null = null,
+  ) {
+    super(message);
+    this.name = "ApiRequestError";
+  }
+}
+
+function getApiBase(): string {
+  const configured = typeof window === "undefined"
+    ? process.env.INTERNAL_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL
+    : process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (configured) return configured.replace(/\/$/, "");
+  if (process.env.NODE_ENV === "production") {
+    throw new ApiRequestError(
+      "API base URL is not configured for this production runtime",
+      "configuration",
+    );
+  }
+  return DEFAULT_DEVELOPMENT_API;
+}
 
 const centroidSchema = z.object({ longitude: z.number(), latitude: z.number() });
 const districtSchema = z.object({
@@ -59,6 +85,11 @@ const collectionSchema = z.object({
 const collectionResponseSchema = z.object({
   count: z.number().int().nonnegative(), items: z.array(collectionSchema),
 });
+const readinessSchema = z.object({
+  status: z.string(),
+  database: z.object({ configured: z.boolean(), available: z.boolean(), message: z.string() }),
+  gee: geeHealthSchema,
+});
 
 export type District = z.infer<typeof districtSchema>;
 export type DistrictResponse = z.infer<typeof districtResponseSchema>;
@@ -67,13 +98,46 @@ export type DistrictObservation = z.infer<typeof observationSchema>;
 export type DistrictObservationResponse = z.infer<typeof observationResponseSchema>;
 export type GeeHealth = z.infer<typeof geeHealthSchema>;
 export type GeeCollectionResponse = z.infer<typeof collectionResponseSchema>;
+export type Readiness = z.infer<typeof readinessSchema>;
 
-async function apiGet<T>(path: string, schema: z.ZodType<T>, signal?: AbortSignal): Promise<T> {
-  const response = await fetch(`${apiBase}${path}`, {
-    signal, cache: "no-store", headers: { Accept: "application/json" },
-  });
-  if (!response.ok) throw new Error(`MDIS API returned ${response.status} for ${path}`);
-  return schema.parse(await response.json());
+async function apiGet<T>(
+  path: string,
+  schema: z.ZodType<T>,
+  signal?: AbortSignal,
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+): Promise<T> {
+  const controller = new AbortController();
+  const onAbort = () => controller.abort(signal?.reason);
+  signal?.addEventListener("abort", onAbort, { once: true });
+  const timeout = setTimeout(() => controller.abort(new Error("request-timeout")), timeoutMs);
+  try {
+    const response = await fetch(`${getApiBase()}${path}`, {
+      signal: controller.signal,
+      cache: "no-store",
+      headers: { Accept: "application/json" },
+    });
+    if (!response.ok) {
+      throw new ApiRequestError(`MDIS API returned ${response.status}`, path, response.status);
+    }
+    try {
+      return schema.parse(await response.json());
+    } catch (reason) {
+      if (reason instanceof z.ZodError) {
+        throw new ApiRequestError("MDIS API returned an invalid response schema", path);
+      }
+      throw reason;
+    }
+  } catch (reason) {
+    if (reason instanceof ApiRequestError) throw reason;
+    if (controller.signal.aborted && !signal?.aborted) {
+      throw new ApiRequestError(`MDIS API timed out after ${timeoutMs} ms`, path);
+    }
+    if (signal?.aborted) throw reason;
+    throw new ApiRequestError("MDIS API is unreachable", path);
+  } finally {
+    clearTimeout(timeout);
+    signal?.removeEventListener("abort", onAbort);
+  }
 }
 
 export function getDistricts(signal?: AbortSignal): Promise<DistrictResponse> {
@@ -108,4 +172,8 @@ export function getGeeHealth(signal?: AbortSignal): Promise<GeeHealth> {
 
 export function getGeeCollections(signal?: AbortSignal): Promise<GeeCollectionResponse> {
   return apiGet("/gee/collections", collectionResponseSchema, signal);
+}
+
+export function getReadiness(signal?: AbortSignal): Promise<Readiness> {
+  return apiGet("/ready", readinessSchema, signal, 5_000);
 }

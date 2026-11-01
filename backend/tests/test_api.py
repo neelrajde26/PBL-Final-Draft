@@ -6,7 +6,8 @@ from app.main import app
 client = TestClient(app)
 
 
-def test_health_and_district_endpoints() -> None:
+def test_health_and_district_endpoints(monkeypatch) -> None:
+    monkeypatch.setattr("app.api.routes.districts._boundary_metadata", lambda district_ids: {})
     health = client.get("/api/health")
     assert health.status_code == 200
     assert health.json()["status"] == "ok"

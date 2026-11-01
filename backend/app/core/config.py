@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
-from pydantic import BeforeValidator, Field, SecretStr
+from pydantic import BeforeValidator, Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 
 
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Maharashtra Drought Intelligence System"
-    app_env: str = "development"
+    app_env: Literal["development", "test", "production"] = "development"
     api_prefix: str = "/api"
     database_url: str = "postgresql+psycopg://mdis:mdis@localhost:5432/mdis"
     redis_url: str = "redis://localhost:6379/0"
@@ -49,6 +49,27 @@ class Settings(BaseSettings):
     )
     auth_secret: SecretStr | None = None
     session_cookie_secure: bool = False
+    boundary_source_path: Path | None = None
+
+    @model_validator(mode="after")
+    def validate_environment_contract(self) -> "Settings":
+        if self.gee_private_key_path and not self.gee_service_account:
+            raise ValueError("GEE_SERVICE_ACCOUNT is required when GEE_PRIVATE_KEY_PATH is set")
+        if self.gee_service_account and not self.gee_private_key_path:
+            raise ValueError("GEE_PRIVATE_KEY_PATH is required when GEE_SERVICE_ACCOUNT is set")
+        if self.app_env == "production":
+            errors: list[str] = []
+            if "localhost" in self.database_url or "change-me" in self.database_url:
+                errors.append("DATABASE_URL must use a production database host and credentials")
+            if self.auth_secret is None or len(self.auth_secret.get_secret_value()) < 32:
+                errors.append("AUTH_SECRET must contain at least 32 characters")
+            if not self.session_cookie_secure:
+                errors.append("SESSION_COOKIE_SECURE must be true")
+            if any("localhost" in origin or "127.0.0.1" in origin for origin in self.cors_origins):
+                errors.append("CORS_ORIGINS must not contain loopback origins")
+            if errors:
+                raise ValueError("Invalid production configuration: " + "; ".join(errors))
+        return self
 
     @property
     def environment(self) -> str:

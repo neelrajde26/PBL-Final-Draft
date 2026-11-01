@@ -1,5 +1,8 @@
 from pathlib import Path
 
+import pytest
+from pydantic import ValidationError
+
 from app.core.config import Settings
 
 
@@ -34,3 +37,11 @@ def test_settings_environment_overrides_dotenv(tmp_path: Path, monkeypatch) -> N
     loaded = Settings(_env_file=env_file)
 
     assert loaded.gee_project_id == "process-project"
+
+
+def test_production_settings_reject_insecure_defaults(monkeypatch) -> None:
+    for name in ("APP_ENV", "DATABASE_URL", "AUTH_SECRET", "SESSION_COOKIE_SECURE", "CORS_ORIGINS"):
+        monkeypatch.delenv(name, raising=False)
+
+    with pytest.raises(ValidationError, match="Invalid production configuration"):
+        Settings(app_env="production", _env_file=None)

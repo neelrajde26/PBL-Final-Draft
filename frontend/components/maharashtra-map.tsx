@@ -1,8 +1,8 @@
 "use client";
 
 import type { FeatureCollection, MultiPolygon } from "geojson";
-import { Map, NavigationControl, type MapLayerMouseEvent } from "maplibre-gl";
-import { useEffect, useRef } from "react";
+import { Map, NavigationControl, type ErrorEvent, type MapLayerMouseEvent } from "maplibre-gl";
+import { useEffect, useRef, useState } from "react";
 
 import type { DistrictBoundaryCollection } from "@/lib/api";
 
@@ -26,6 +26,8 @@ export function MaharashtraMap({
   const onSelectRef = useRef(onSelect);
   const initialSelectionRef = useRef(selectedDistrictId);
   const initialObservedRef = useRef(observedDistrictIds);
+  const [attempt, setAttempt] = useState(0);
+  const [mapError, setMapError] = useState<string | null>(null);
 
   useEffect(() => {
     onSelectRef.current = onSelect;
@@ -33,6 +35,7 @@ export function MaharashtraMap({
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    setMapError(null);
     const map = new Map({
       container: containerRef.current,
       style: {
@@ -47,6 +50,11 @@ export function MaharashtraMap({
       attributionControl: false,
     });
     map.addControl(new NavigationControl({ showCompass: false }), "top-right");
+    map.on("error", (event: ErrorEvent) => {
+      const detail = event.error?.message ?? "Unknown MapLibre error";
+      console.error("MDIS map error", event.error);
+      setMapError(detail);
+    });
     map.on("load", () => {
       map.addSource(sourceId, {
         type: "geojson",
@@ -85,7 +93,7 @@ export function MaharashtraMap({
       map.remove();
       mapRef.current = null;
     };
-  }, [boundaries]);
+  }, [attempt, boundaries]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -98,5 +106,16 @@ export function MaharashtraMap({
     ]);
   }, [observedDistrictIds, selectedDistrictId]);
 
-  return <div className="district-map" ref={containerRef} aria-label="Interactive Maharashtra district boundary map" />;
+  return (
+    <div className="map-container">
+      <div className="district-map" ref={containerRef} aria-label="Interactive Maharashtra district boundary map" />
+      {mapError && (
+        <div className="map-error" role="alert">
+          <strong>The district map could not load</strong>
+          <p>{mapError}</p>
+          <button type="button" onClick={() => setAttempt((value) => value + 1)}>Retry map</button>
+        </div>
+      )}
+    </div>
+  );
 }
