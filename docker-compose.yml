@@ -1,0 +1,106 @@
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    container_name: mdis-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: mdis
+      POSTGRES_USER: mdis
+      POSTGRES_PASSWORD: mdis_secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mdis -d mdis"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: mdis-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mdis-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - REDIS_URL=redis://redis:6379/0
+      - GEE_PROJECT_ID=gee-pbl
+      - ENVIRONMENT=production
+      - JWT_SECRET=mdis_prod_jwt_secret_key_long_and_secure_2024
+      - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mdis-celery-worker
+    restart: unless-stopped
+    command: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info", "-c", "4"]
+    environment:
+      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - REDIS_URL=redis://redis:6379/0
+      - GEE_PROJECT_ID=gee-pbl
+      - ENVIRONMENT=production
+    depends_on:
+      - api
+      - postgres
+      - redis
+
+  beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mdis-celery-beat
+    restart: unless-stopped
+    command: ["celery", "-A", "app.workers.celery_app", "beat", "-l", "info"]
+    environment:
+      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - REDIS_URL=redis://redis:6379/0
+      - GEE_PROJECT_ID=gee-pbl
+      - ENVIRONMENT=production
+    depends_on:
+      - api
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: mdis-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - INTERNAL_API_BASE_URL=http://api:8000/api
+      - NEXT_PUBLIC_API_BASE_URL=http://127.0.0.1:8000/api
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  redis_data:
+

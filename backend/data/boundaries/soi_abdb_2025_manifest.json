@@ -1,0 +1,22 @@
+{
+  "boundary_version": "soi-abdb-2025",
+  "source_name": "Survey of India Administrative Boundary Database",
+  "source_url": "https://surveyofindia.gov.in/documents/State_District_Subdistrict_PAN%20INDIA.rar",
+  "license": "Copyright; Geospatial Guidelines 2021 apply. Geometry is not redistributed by this repository.",
+  "source_published_at": "2026-05-06",
+  "administrative_validity": "2022-2025; Maharashtra harmonized with ORGI in 2025",
+  "source_scale": "1:50000",
+  "source_crs": "PROJCS[\"LCC_WGS84\",GEOGCS[\"WGS 84\",DATUM[\"WGS_1984\",SPHEROID[\"WGS 84\",6378137,298.257223563,AUTHORITY[\"EPSG\",\"7030\"]],AUTHORITY[\"EPSG\",\"6326\"]],PRIMEM[\"Greenwich\",0],UNIT[\"Degree\",0.0174532925199433]],PROJECTION[\"Lambert_Conformal_Conic_2SP\"],PARAMETER[\"latitude_of_origin\",24],PARAMETER[\"central_meridian\",80],PARAMETER[\"standard_parallel_1\",12.472944],PARAMETER[\"standard_parallel_2\",35.172806],PARAMETER[\"false_easting\",4000000],PARAMETER[\"false_northing\",4000000],UNIT[\"metre\",1,AUTHORITY[\"EPSG\",\"9001\"]],AXIS[\"Easting\",EAST],AXIS[\"Northing\",NORTH]]",
+  "output_crs": "EPSG:4326",
+  "downloaded_at": "2026-11-01T17:23:38.972953+00:00",
+  "source_archive_sha256": "b8325e5d9dd0f04a6663d775363fe38cd2f23bd9dbae3fb7118b4e6e0ce0bcb7",
+  "output_geojson_sha256": "8f350b85d395cdf622fc7b7d914b98163ebc37aa0dee05bafe88c0367012fc48",
+  "district_count": 36,
+  "total_area_sq_km": 307494.20040475205,
+  "validation": {
+    "geometry_valid": true,
+    "expected_districts": 36,
+    "duplicate_districts": 0,
+    "material_overlap_threshold_sq_km": 0.1
+  }
+}
