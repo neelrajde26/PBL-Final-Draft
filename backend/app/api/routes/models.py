@@ -54,7 +54,7 @@ def get_feature_importance(
         raise HTTPException(status_code=404, detail=f"Model '{model_key}' not found.")
 
     # High-impact feature contributions for the registered domain model
-    importance_map = {
+    importance_map = model.feature_importance or {
         "rainfall_lag_1": 0.284,
         "spi_1": 0.231,
         "spi_3": 0.185,

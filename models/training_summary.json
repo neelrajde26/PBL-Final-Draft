@@ -1,0 +1,86 @@
+{
+  "mdis-meteorological-xgboost": {
+    "metrics": {
+      "accuracy": 0.9347,
+      "precision": 0.6976,
+      "recall": 0.9875,
+      "f1": 0.8176,
+      "f1_macro": 0.8889,
+      "roc_auc": 0.984,
+      "brier_score": 0.0515
+    },
+    "baseline_metrics": {
+      "accuracy": 0.8583,
+      "precision": 0.5198,
+      "recall": 0.575,
+      "f1": 0.546,
+      "f1_macro": 0.731
+    },
+    "importance": {
+      "spi_1": 0.4986,
+      "sin_month": 0.3125,
+      "cos_month": 0.0735,
+      "rainfall_lag_1": 0.0573,
+      "spi_3": 0.0299,
+      "rainfall_rolling_mean_3": 0.0161,
+      "rainfall_lag_2": 0.0122
+    },
+    "artifact": "models\\mdis_meteorological_xgboost_v1.joblib"
+  },
+  "mdis-agricultural-lightgbm": {
+    "metrics": {
+      "accuracy": 0.9662,
+      "precision": 0.9391,
+      "recall": 0.971,
+      "f1": 0.9548,
+      "f1_macro": 0.9639,
+      "roc_auc": 0.9942,
+      "brier_score": 0.0251
+    },
+    "baseline_metrics": {
+      "accuracy": 0.825,
+      "precision": 0.762,
+      "recall": 0.762,
+      "f1": 0.762,
+      "f1_macro": 0.8118
+    },
+    "importance": {
+      "ndvi_lag_1": 0.2479,
+      "ndvi": 0.1765,
+      "tci": 0.1313,
+      "rainfall_rolling_mean_3": 0.1097,
+      "vci": 0.1027,
+      "lst_lag_1": 0.0999,
+      "cos_month": 0.0685,
+      "sin_month": 0.0636
+    },
+    "artifact": "models\\mdis_agricultural_lightgbm_v1.joblib"
+  },
+  "mdis-hydrological-rf": {
+    "metrics": {
+      "accuracy": 0.7398,
+      "precision": 0.0601,
+      "recall": 0.7,
+      "f1": 0.1108,
+      "f1_macro": 0.4792,
+      "roc_auc": 0.8046,
+      "brier_score": 0.1475
+    },
+    "baseline_metrics": {
+      "accuracy": 0.9565,
+      "precision": 0.06,
+      "recall": 0.06,
+      "f1": 0.06,
+      "f1_macro": 0.5189
+    },
+    "importance": {
+      "spi_3": 0.4243,
+      "sin_month": 0.2383,
+      "rainfall_rolling_mean_3": 0.1069,
+      "soil_moisture_lag_1": 0.1034,
+      "cos_month": 0.0833,
+      "soil_moisture_lag_2": 0.0437
+    },
+    "artifact": "models\\mdis_hydrological_rf_v1.joblib"
+  }
+}

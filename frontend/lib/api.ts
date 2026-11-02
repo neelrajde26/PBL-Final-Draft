@@ -410,3 +410,43 @@ export function getFarmerAdvisory(
     signal,
   );
 }
+
+
+export const farmerPredictionResponseSchema = z.object({
+  district_id: z.string(),
+  district_name: z.string(),
+  region: z.string(),
+  crop: z.string(),
+  growth_stage: z.string().nullable().optional(),
+  risk_level: z.string(),
+  probability: z.number(),
+  horizon: z.string(),
+  severity_label_mr: z.string(),
+  severity_label_en: z.string(),
+  drivers_mr: z.array(z.string()),
+  drivers_en: z.array(z.string()),
+  advisory_mr: z.string(),
+  advisory_en: z.string(),
+  is_scenario: z.boolean(),
+  confidence: z.string(),
+  model_version: z.string(),
+});
+
+export type FarmerPredictionResult = z.infer<typeof farmerPredictionResponseSchema>;
+
+export function getFarmerPrediction(
+  params: {
+    district_id: string;
+    crop: string;
+    growth_stage?: string;
+    sowing_date?: string;
+    irrigation_type?: string;
+    soil_condition?: string;
+    recent_rainfall?: string;
+    crop_stress?: string;
+    horizon?: string;
+  },
+  signal?: AbortSignal,
+): Promise<FarmerPredictionResult> {
+  return apiPost("/farmer/predict", params, farmerPredictionResponseSchema, signal);
+}

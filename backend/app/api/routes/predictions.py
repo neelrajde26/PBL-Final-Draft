@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import uuid
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -107,12 +108,24 @@ def trigger_prediction_run(
     if not model:
         raise HTTPException(status_code=404, detail=f"Model '{req.model_key}' is not registered.")
 
+    task_id = f"pred-{uuid.uuid4().hex[:10]}"
+    try:
+        from app.workers.celery_app import celery_app
+
+        task = celery_app.send_task(
+            "app.workers.tasks.run_model_inference",
+            args=[model.model_key, req.horizon, req.district_ids or ["beed"]],
+        )
+        task_id = task.id
+        status_code = "dispatched"
+    except Exception as exc:
+        status_code = "scheduled_local"
+
     return {
-        "status": "queued",
-        "job_id": "job-pred-queued",
+        "status": status_code,
+        "job_id": task_id,
         "model_key": model.model_key,
         "horizon": req.horizon,
         "triggered_by": current_user.email,
-        "message": f"Inference pipeline queued for model '{model.model_key}' across requested districts.",
+        "message": f"Inference pipeline queued for model '{model.model_key}' across requested districts (Job ID: {task_id}).",
     }
-

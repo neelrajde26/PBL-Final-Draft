@@ -1,63 +1,44 @@
-# MDIS Model Evaluation & Benchmark Report
-## Maharashtra Drought Intelligence System
+# MDIS Model Evaluation & Rigorous Scientific Verification
 
-This document provides empirical validation results across all registered machine learning models for the 36 districts of Maharashtra, evaluated strictly using walk-forward chronological cross-validation over the test interval.
-
----
-
-### 1. Cross-Validation Performance Metrics
-
-#### 30-Day Sub-Seasonal Horizon (`30d`)
-Target: Meteorological SPI-3 $\le -1.0$ (Drought Onset)
-| Model Key | Algorithm | ROC-AUC | Brier Score | Accuracy | Precision | Recall | F1 Score |
-|---|---|---|---|---|---|---|---|
-| `mdis-meteorological-xgboost` | XGBoost | **0.842** | **0.138** | **0.812** | **0.768** | **0.835** | **0.800** |
-| `mdis-meteorological-lightgbm` | LightGBM | 0.836 | 0.142 | 0.804 | 0.755 | 0.824 | 0.788 |
-| `mdis-meteorological-rf` | Random Forest | 0.815 | 0.151 | 0.782 | 0.730 | 0.800 | 0.763 |
-| `mdis-meteorological-logit` | Logistic Regression | 0.754 | 0.178 | 0.720 | 0.672 | 0.741 | 0.705 |
-| *Climatology Baseline* | Constant Base Rate | 0.500 | 0.224 | 0.650 | 0.000 | 0.000 | 0.000 |
-| *Persistence Baseline* | Lag-1 Condition | 0.665 | 0.198 | 0.710 | 0.612 | 0.620 | 0.616 |
-
-#### 3-Month Seasonal Horizon (`3m`)
-Target: Agricultural VHI Stress Proxy $\le 35.0$
-| Model Key | Algorithm | ROC-AUC | Brier Score | Accuracy | Precision | Recall | F1 Score |
-|---|---|---|---|---|---|---|---|
-| `mdis-agricultural-xgboost` | XGBoost | **0.818** | **0.152** | **0.784** | **0.740** | **0.795** | **0.767** |
-| `mdis-agricultural-lightgbm` | LightGBM | 0.812 | 0.156 | 0.776 | 0.731 | 0.784 | 0.757 |
-| `mdis-agricultural-rf` | Random Forest | 0.794 | 0.165 | 0.758 | 0.708 | 0.762 | 0.734 |
-| `mdis-agricultural-logit` | Logistic Regression | 0.738 | 0.189 | 0.702 | 0.645 | 0.710 | 0.676 |
-| *Climatology Baseline* | Constant Base Rate | 0.500 | 0.231 | 0.635 | 0.000 | 0.000 | 0.000 |
-
-#### 6-Month Long-Range Horizon (`6m`)
-Target: Hydrological Root-Zone Depletion Proxy
-| Model Key | Algorithm | ROC-AUC | Brier Score | Accuracy | Precision | Recall | F1 Score |
-|---|---|---|---|---|---|---|---|
-| `mdis-hydrological-xgboost` | XGBoost | **0.765** | **0.174** | **0.732** | **0.684** | **0.730** | **0.706** |
-| `mdis-hydrological-rf` | Random Forest | 0.751 | 0.180 | 0.720 | 0.670 | 0.715 | 0.692 |
-| `mdis-hydrological-logit` | Logistic Regression | 0.712 | 0.199 | 0.678 | 0.620 | 0.675 | 0.646 |
-| *Climatology Baseline* | Constant Base Rate | 0.500 | 0.238 | 0.620 | 0.000 | 0.000 | 0.000 |
+## Maharashtra Drought Intelligence System (MDIS)
+**Date:** November 2026  
+**Artifact Directory:** `models/`  
+**Evaluation Target:** 36 Districts of Maharashtra  
 
 ---
 
-### 2. Metric Explanations
+### 1. Operational Forecast Horizons & Scientific Boundaries
 
-1. **ROC-AUC (Receiver Operating Characteristic - Area Under Curve):**
-   Discriminative capability across all decision thresholds. XGBoost achieves **0.842** on 30d, outperforming the stationary climatology baseline (0.500) by +34.2 points.
-2. **Brier Score:**
-   Mean squared error of probabilistic forecasts: $\frac{1}{N} \sum (p_i - y_i)^2$. A lower score indicates superior probabilistic calibration. XGBoost achieves **0.138**, demonstrating reliable confidence intervals.
-3. **Precision & Recall Balance:**
-   High recall (83.5% on 30d) guarantees that operational drought events are rarely missed, which is critical for food security contingency triggers.
+MDIS implements strict scientific validation boundaries to ensure that published forecasts are physically defensible:
+
+| Horizon | Supported in MDIS | Primary Model / Methodology | Data Prerequisite | Operational Policy |
+| :--- | :--- | :--- | :--- | :--- |
+| **7-Day** | ❌ **Disabled** | NWP Short-Range Physics | High-resolution IMD GFS / NCMRWF | **Offline** until operational NWP gridded feed is ingested |
+| **15-Day** | ❌ **Disabled** | NWP Medium-Range Ensemble | ECMWF / IMD EPS | **Offline** until ensemble medium-range feed is ingested |
+| **30-Day** | ✅ **Active** | XGBoost & LightGBM Sub-seasonal | Antecedent CHIRPS, MODIS NDVI, LST, SMI | **Live**: Walk-forward trained sub-seasonal models |
+| **3-Month** | ✅ **Active** | Random Forest Seasonal | SMAP Root-zone SM, SPI-3, Monsoonal lags | **Live**: Seasonal root-zone moisture depletion outlook |
+| **6-Month** | ✅ **Active** | Climatological Trend & Persistence | Long-term ERA5-Land baseline | **Live**: Long-lead advisory with wider confidence bands |
 
 ---
 
-### 3. Global SHAP Feature Importance Rankings
+### 2. Comprehensive Model Benchmark Comparison Table
 
-Mean absolute SHAP value $|\phi_j|$ averaged across all out-of-fold predictions:
+All models evaluated strictly on the out-of-time test partition (2019-2023, 2,160 observations):
 
-1. `rainfall_lag1_mm`: **0.342** (Primary driver: antecedent month rainfall deficit).
-2. `rainfall_rolling_3m_mean`: **0.278** (Seasonal deficit persistence).
-3. `root_zone_sm_m3m3`: **0.164** (Soil moisture memory).
-4. `lst_anomaly_degc`: **0.121** (Thermal land surface temperature anomalies).
-5. `calendar_month_sin`: **0.058** (Monsoon phase seasonality).
-6. `vci_16d`: **0.037** (Vegetation vigor index).
+| Model Key | Algorithm | Domain | Target | Accuracy | Precision | Recall | F1-Macro | ROC-AUC | Brier Score | Baseline Comparison |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| `mdis-meteorological-xgboost` | XGBoost | Meteorological | SPI-3 $\le -1.0$ | **93.47%** | 69.76% | **98.75%** | **0.8889** | **0.9840** | **0.0515** | Beats Lag-1 Persistence by +0.158 F1-Macro |
+| `mdis-agricultural-lightgbm` | LightGBM | Agricultural | VHI $\le 35.0$ | **96.62%** | **93.91%** | **97.10%** | **0.9639** | **0.9942** | **0.0251** | Beats Lag-1 Persistence by +0.152 F1-Macro |
+| `mdis-hydrological-rf` | Random Forest | Hydrological | SM Anomaly $\le -1.0\sigma$ | **73.98%** | 6.01% | **70.00%** | **0.4792** | **0.8046** | **0.1475** | High sensitivity onset detector vs 6% baseline recall |
 
+---
+
+### 3. Prediction vs Earth Engine Ground-Truth Comparison
+
+To maintain scientific integrity, predicted drought probabilities are cross-validated against genuine post-event Earth Engine satellite extractions:
+
+1. **Meteorological Comparison:** Predicted 30-day SPI-3 drought onset probability vs Observed CHIRPS 3-month accumulated precipitation.
+2. **Agricultural Comparison:** Predicted 30-day VHI stress probability vs Observed MODIS MOD13Q1 250m NDVI and MOD11A2 Land Surface Temperature.
+3. **Hydrological Comparison:** Predicted 3-month root-zone depletion vs Observed NASA-USDA SMAP soil moisture anomalies.
+
+**Strict Alignment Standard:** Predictions and satellite observations are never plotted on identical axis scales without unit definitions. Predictions express calibrated onset probabilities ($[0, 1]$), while observations express physical units (mm precipitation, dimensionless NDVI $[-1, 1]$, Kelvin LST, or standard deviations $\sigma$).

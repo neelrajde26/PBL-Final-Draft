@@ -22,15 +22,69 @@ class GeeHealth:
     auth_method: str | None
     checked_at: str
     message: str
+    error_category: str | None = None
+    remediation: str | None = None
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
 
 
-def _safe_error(error: Exception) -> str:
-    if isinstance(error, (GeeConfigurationError, GeeDependencyError)):
-        return str(error)
-    return "Earth Engine initialization or remote health check failed."
+def _classify_error(error: Exception, project_id: str | None) -> tuple[str, str, str]:
+    """Diagnose Earth Engine failure into a standard category, message, and actionable remediation."""
+    msg = str(error)
+    low = msg.lower()
+
+    if isinstance(error, GeeDependencyError) or "no module named 'ee'" in low:
+        return (
+            "dependency_missing",
+            "The earthengine-api Python package is not installed.",
+            "Install earthengine-api via: pip install earthengine-api",
+        )
+    if isinstance(error, GeeConfigurationError):
+        if "project" in low:
+            return (
+                "missing_project",
+                msg,
+                "Configure GEE_PROJECT_ID in .env (e.g., GEE_PROJECT_ID=gee-pbl).",
+            )
+        if "private" in low or "key" in low:
+            return (
+                "invalid_service_account_key",
+                msg,
+                "Verify GEE_PRIVATE_KEY_PATH points to a valid service account JSON key file.",
+            )
+        return ("configuration_error", msg, "Inspect GEE configuration settings in .env.")
+
+    if "authorize access" in low or "authenticate" in low or "credentials" in low:
+        return (
+            "credentials_missing",
+            "Application Default Credentials or Earth Engine credentials were not found.",
+            "Run 'earthengine authenticate' in your command line, or set GEE_SERVICE_ACCOUNT and GEE_PRIVATE_KEY_PATH.",
+        )
+    if "permission denied" in low or "403" in low or "not authorized" in low:
+        return (
+            "permission_denied",
+            f"Access denied for project '{project_id}'. The account does not have Earth Engine permissions.",
+            f"Ensure the Earth Engine API is enabled in Google Cloud Console for project '{project_id}' and your user/service account has 'Earth Engine Resource Viewer' or 'Earth Engine User' role.",
+        )
+    if "timeout" in low or "timed out" in low:
+        return (
+            "remote_timeout",
+            "The remote Earth Engine evaluation timed out.",
+            "Check internet connectivity and Google Cloud API service status, or increase GEE_REQUEST_TIMEOUT_SECONDS.",
+        )
+    if "not found" in low or "404" in low or "collection" in low:
+        return (
+            "collection_access_failure",
+            "The requested Earth Engine image collection or asset was not found.",
+            "Verify collection ID in GEE Data Catalog.",
+        )
+
+    return (
+        "remote_api_error",
+        f"Earth Engine evaluation failed: {msg}",
+        "Inspect Google Cloud Earth Engine quota and service health.",
+    )
 
 
 class EarthEngineClient:
@@ -91,28 +145,23 @@ class EarthEngineClient:
                 auth_method=None,
                 checked_at=now,
                 message="Earth Engine is not configured; stored observations remain available.",
+                error_category="not_configured",
+                remediation="Configure GEE_PROJECT_ID and credentials in .env.",
             )
         try:
             self.initialize(verify_remote=verify_remote)
-        except GeeDependencyError as exc:
-            return GeeHealth(
-                status="dependency_missing",
-                configured=True,
-                available=False,
-                project_id=self.settings.gee_project_id,
-                auth_method=None,
-                checked_at=now,
-                message=_safe_error(exc),
-            )
         except Exception as exc:
+            category, msg, remediation = _classify_error(exc, self.settings.gee_project_id)
             return GeeHealth(
-                status="error",
+                status="error" if category != "dependency_missing" else "dependency_missing",
                 configured=True,
                 available=False,
                 project_id=self.settings.gee_project_id,
                 auth_method=self._auth_method,
                 checked_at=now,
-                message=_safe_error(exc),
+                message=msg,
+                error_category=category,
+                remediation=remediation,
             )
         return GeeHealth(
             status="connected" if verify_remote else "initialized",
@@ -130,4 +179,3 @@ class EarthEngineClient:
 
 
 gee_client = EarthEngineClient()
-

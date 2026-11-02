@@ -8,17 +8,20 @@ import "./globals.css";
 
 import type { Metadata } from "next";
 import { Shell } from "@/components/shell";
+import { I18nProvider } from "@/lib/i18n";
 
 export const metadata: Metadata = {
-  title: { default: "MDIS", template: "%s · MDIS" },
-  description: "Maharashtra district drought monitoring, satellite evidence, and early warning.",
+  title: { default: "MDIS · Maharashtra Drought Intelligence System", template: "%s · MDIS" },
+  description: "Maharashtra 36-district drought monitoring, Google Earth Engine satellite evidence, and early warning platform.",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
+    <html lang="mr">
       <body>
-        <Shell>{children}</Shell>
+        <I18nProvider>
+          <Shell>{children}</Shell>
+        </I18nProvider>
       </body>
     </html>
   );

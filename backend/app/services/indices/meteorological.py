@@ -107,7 +107,7 @@ def calculate_spi(
     scale: int = 1,
 ) -> list[float | None]:
     """Calculate the Standardized Precipitation Index (SPI) for a given accumulation scale."""
-    if not rainfall_series:
+    if len(rainfall_series) == 0:
         return []
 
     series = pd.Series(rainfall_series, dtype=float)
@@ -134,7 +134,7 @@ def calculate_spei(
     scale: int = 3,
 ) -> list[float | None]:
     """Calculate the Standardized Precipitation Evapotranspiration Index (SPEI)."""
-    if len(precipitation_series) != len(pet_series) or not precipitation_series:
+    if len(precipitation_series) != len(pet_series) or len(precipitation_series) == 0:
         return []
 
     p = pd.Series(precipitation_series, dtype=float)

@@ -1,5 +1,6 @@
 import json
 from collections.abc import Iterable
+from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException
@@ -8,6 +9,22 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from app.data.districts import DISTRICTS, get_district
 from app.db import database
+
+_LOCAL_BOUNDARY_FILE = (
+    Path(__file__).resolve().parent.parent.parent
+    / "data"
+    / "boundaries"
+    / "maharashtra_36_districts.geojson"
+)
+
+
+def _load_local_boundary_collection() -> dict[str, Any]:
+    if _LOCAL_BOUNDARY_FILE.is_file():
+        try:
+            return json.loads(_LOCAL_BOUNDARY_FILE.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    return {"type": "FeatureCollection", "count": 0, "features": []}
 
 
 router = APIRouter(prefix="/districts", tags=["districts"])
@@ -33,23 +50,42 @@ def _public(district, boundary: dict[str, Any] | None = None) -> dict[str, objec
 
 
 def _boundary_metadata(district_ids: Iterable[str]) -> dict[str, dict[str, Any]]:
-    ids = list(district_ids)
+    ids = set(district_ids)
     if not ids:
         return {}
-    with database.session() as session:
-        rows = session.execute(
-            text(
-                """
-                SELECT district_id, boundary_version,
-                       ST_X(centroid) AS centroid_lon,
-                       ST_Y(centroid) AS centroid_lat
-                FROM district_boundaries
-                WHERE is_active = true AND district_id = ANY(:district_ids)
-                """
-            ),
-            {"district_ids": ids},
-        ).mappings()
-        return {row["district_id"]: dict(row) for row in rows}
+    results: dict[str, dict[str, Any]] = {}
+    try:
+        with database.session() as session:
+            rows = session.execute(
+                text(
+                    """
+                    SELECT district_id, boundary_version,
+                           ST_X(centroid) AS centroid_lon,
+                           ST_Y(centroid) AS centroid_lat
+                    FROM district_boundaries
+                    WHERE is_active = true AND district_id = ANY(:district_ids)
+                    """
+                ),
+                {"district_ids": list(ids)},
+            ).mappings()
+            for row in rows:
+                results[row["district_id"]] = dict(row)
+    except Exception:
+        pass
+
+    if len(results) < len(ids):
+        local_data = _load_local_boundary_collection()
+        for f in local_data.get("features", []):
+            did = f.get("properties", {}).get("district_id")
+            if did in ids and did not in results:
+                props = f["properties"]
+                results[did] = {
+                    "district_id": did,
+                    "boundary_version": props.get("boundary_version", "soi-abdb-2025"),
+                    "centroid_lon": props.get("centroid_lon"),
+                    "centroid_lat": props.get("centroid_lat"),
+                }
+    return results
 
 
 @router.get("")
@@ -70,6 +106,7 @@ def district_boundaries(region: str | None = None) -> dict[str, object]:
     district_ids = [
         district.id for district in DISTRICTS if region is None or district.region == region
     ]
+    features: list[dict[str, Any]] = []
     try:
         with database.session() as session:
             rows = session.execute(
@@ -110,8 +147,16 @@ def district_boundaries(region: str | None = None) -> dict[str, object]:
                 }
                 for row in rows
             ]
-    except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Boundary database is unavailable") from exc
+    except Exception:
+        features = []
+
+    if not features:
+        local_data = _load_local_boundary_collection()
+        all_local = local_data.get("features", [])
+        features = [
+            f for f in all_local if f.get("properties", {}).get("district_id") in district_ids
+        ]
+
     return {"type": "FeatureCollection", "count": len(features), "features": features}
 
 
@@ -134,38 +179,46 @@ def district_boundary(district_id: str) -> dict[str, object]:
         raise HTTPException(status_code=404, detail="District not found")
     try:
         with database.session() as session:
-            row = session.execute(
-                text(
-                    """
-                    SELECT boundary_version, source_name, source_url,
-                           ST_AsGeoJSON(geometry) AS geometry,
-                           ST_X(centroid) AS centroid_lon,
-                           ST_Y(centroid) AS centroid_lat,
-                           checksum_sha256, created_at
-                    FROM district_boundaries
-                    WHERE district_id = :district_id AND is_active = true
-                    """
-                ),
-                {"district_id": district.id},
-            ).mappings().one_or_none()
-    except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Boundary database is unavailable") from exc
-    if row is None:
-        raise HTTPException(status_code=404, detail="Active district boundary not available")
-    return {
-        "type": "Feature",
-        "geometry": json.loads(row["geometry"]),
-        "properties": {
-            "district_id": district.id,
-            "district_code": district.code,
-            "district_name": district.name,
-            "boundary_version": row["boundary_version"],
-            "source_name": row["source_name"],
-            "source_url": row["source_url"],
-            "centroid_lon": row["centroid_lon"],
-            "centroid_lat": row["centroid_lat"],
-            "checksum_sha256": row["checksum_sha256"],
-            "stored_at": row["created_at"].isoformat(),
-        },
-    }
+            row = (
+                session.execute(
+                    text(
+                        """
+                        SELECT boundary_version, source_name, source_url,
+                               ST_AsGeoJSON(geometry) AS geometry,
+                               ST_X(centroid) AS centroid_lon,
+                               ST_Y(centroid) AS centroid_lat,
+                               checksum_sha256, created_at
+                        FROM district_boundaries
+                        WHERE district_id = :district_id AND is_active = true
+                        """
+                    ),
+                    {"district_id": district.id},
+                )
+                .mappings()
+                .one_or_none()
+            )
+            if row is not None:
+                return {
+                    "type": "Feature",
+                    "geometry": json.loads(row["geometry"]),
+                    "properties": {
+                        "district_id": district.id,
+                        "district_code": district.code,
+                        "district_name": district.name,
+                        "boundary_version": row["boundary_version"],
+                        "source_name": row["source_name"],
+                        "source_url": row["source_url"],
+                        "centroid_lon": row["centroid_lon"],
+                        "centroid_lat": row["centroid_lat"],
+                        "checksum_sha256": row["checksum_sha256"],
+                        "stored_at": row["created_at"].isoformat(),
+                    },
+                }
+    except Exception:
+        pass
 
+    local_data = _load_local_boundary_collection()
+    for f in local_data.get("features", []):
+        if f.get("properties", {}).get("district_id") == district.id:
+            return f
+    raise HTTPException(status_code=404, detail="Active district boundary not available")
