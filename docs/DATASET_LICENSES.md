@@ -39,3 +39,4 @@ All machine learning frameworks and geospatial libraries deployed in MDIS are go
 
 The Maharashtra Drought Intelligence System is designed for scientific research, early warning assistance, and academic evaluation.
 Predictions and indices provided by MDIS must be cross-verified against official relief gazettes issued by the Revenue & Forest Department of the Government of Maharashtra and IMD Pune before initiating statutory administrative declarations or relief compensation disbursements.
+

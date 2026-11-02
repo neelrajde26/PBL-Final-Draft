@@ -51,3 +51,4 @@ This inventory records all satellite, meteorological, reanalysis, hydrological, 
 1. **Spatial Strictness:** No artificial coordinate offsets or simplified bounding boxes. All zonal statistics are clipped strictly to the Survey of India 36-district boundary MultiPolygons.
 2. **Temporal Leakage Prevention:** All engineered features at time $t$ are derived exclusively from historical records at or before $t-1$. No future interpolation or full-dataset standardization is permitted.
 3. **Graceful Fallback:** If live Earth Engine or database services are unreachable, the system transparently falls back to preprocessed verified time-series to prevent service outages.
+

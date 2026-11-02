@@ -10,20 +10,20 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.data.districts import DISTRICTS, get_district
 from app.db import database
 
-_LOCAL_BOUNDARY_FILE = (
-    Path(__file__).resolve().parent.parent.parent
-    / "data"
-    / "boundaries"
-    / "maharashtra_36_districts.geojson"
-)
+_SEARCH_BOUNDARY_PATHS = [
+    Path(__file__).resolve().parents[3] / "data" / "boundaries" / "maharashtra_36_districts.geojson",
+    Path("backend/data/boundaries/maharashtra_36_districts.geojson"),
+    Path(__file__).resolve().parent.parent.parent / "data" / "boundaries" / "maharashtra_36_districts.geojson",
+]
 
 
 def _load_local_boundary_collection() -> dict[str, Any]:
-    if _LOCAL_BOUNDARY_FILE.is_file():
-        try:
-            return json.loads(_LOCAL_BOUNDARY_FILE.read_text(encoding="utf-8"))
-        except Exception:
-            pass
+    for cand in _SEARCH_BOUNDARY_PATHS:
+        if cand.is_file():
+            try:
+                return json.loads(cand.read_text(encoding="utf-8"))
+            except Exception:
+                pass
     return {"type": "FeatureCollection", "count": 0, "features": []}
 
 

@@ -84,3 +84,4 @@ Every feature at time step $t$ is computed using **strictly past observations ($
   - Null/NaN count in feature columns: **0**
   - All 36 district IDs present and matched against `maharashtra_36_districts.geojson`
   - Zero target leakage into lagged feature predictors.
+
