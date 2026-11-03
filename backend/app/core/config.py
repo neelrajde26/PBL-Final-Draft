@@ -61,6 +61,13 @@ class Settings(BaseSettings):
                     cleaned[k] = None
                 else:
                     cleaned[k] = v
+            # Docker Compose and deployment alias mappings
+            if "app_env" not in cleaned and "environment" in cleaned and cleaned["environment"]:
+                cleaned["app_env"] = cleaned["environment"]
+            if "auth_secret" not in cleaned and "jwt_secret" in cleaned and cleaned["jwt_secret"]:
+                cleaned["auth_secret"] = cleaned["jwt_secret"]
+            if "cors_origins" not in cleaned and "allowed_origins" in cleaned and cleaned["allowed_origins"]:
+                cleaned["cors_origins"] = cleaned["allowed_origins"]
             return cleaned
         return data
 
@@ -72,6 +79,10 @@ class Settings(BaseSettings):
             raise ValueError("GEE_SERVICE_ACCOUNT is required when GEE_PRIVATE_KEY_PATH is set")
         if has_account and not has_key:
             raise ValueError("GEE_PRIVATE_KEY_PATH is required when GEE_SERVICE_ACCOUNT is set")
+        if self.gee_private_key_path:
+            resolved = Path(self.gee_private_key_path).resolve()
+            if not resolved.is_file():
+                raise ValueError(f"GEE_PRIVATE_KEY_PATH file does not exist: {self.gee_private_key_path}")
         if self.app_env == "production":
             errors: list[str] = []
             if "localhost" in self.database_url or "change-me" in self.database_url:
@@ -92,4 +103,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-

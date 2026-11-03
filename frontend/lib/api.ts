@@ -450,3 +450,74 @@ export function getFarmerPrediction(
 ): Promise<FarmerPredictionResult> {
   return apiPost("/farmer/predict", params, farmerPredictionResponseSchema, signal);
 }
+
+export const predictionItemSchema = z.object({
+  id: z.string(),
+  district_id: z.string(),
+  district_name: z.string(),
+  region: z.string(),
+  model_key: z.string(),
+  forecast_horizon: z.string(),
+  target_start: z.string().nullable().optional(),
+  target_end: z.string().nullable().optional(),
+  risk_level: z.string(),
+  probability: z.number(),
+  lower_interval: z.number().nullable().optional(),
+  upper_interval: z.number().nullable().optional(),
+  explanation: z.string().nullable().optional(),
+  source_quality: z.string().nullable().optional(),
+  is_demo: z.boolean().nullable().optional(),
+  created_at: z.string().nullable().optional(),
+});
+
+export type PredictionItem = z.infer<typeof predictionItemSchema>;
+
+export function getPredictions(
+  horizon = "30d",
+  districtId?: string,
+  signal?: AbortSignal,
+): Promise<{ count: number; horizon: string; items: PredictionItem[] }> {
+  const p = new URLSearchParams({ horizon });
+  if (districtId) p.set("district_id", districtId);
+  return apiGet(
+    `/predictions?${p.toString()}`,
+    z.object({
+      count: z.number(),
+      horizon: z.string(),
+      items: z.array(predictionItemSchema),
+    }),
+    signal,
+  );
+}
+
+export const ingestionLogSchema = z.object({
+  id: z.string(),
+  collection_key: z.string(),
+  status: z.string(),
+  period_start: z.string().nullable().optional(),
+  period_end: z.string().nullable().optional(),
+  started_at: z.string(),
+  finished_at: z.string().nullable().optional(),
+  district_count: z.number().nullable().optional(),
+  observation_count: z.number().nullable().optional(),
+  retry_count: z.number().nullable().optional(),
+  last_successful_acquisition: z.string().nullable().optional(),
+  error_type: z.string().nullable().optional(),
+  error_message: z.string().nullable().optional(),
+});
+
+export type IngestionLog = z.infer<typeof ingestionLogSchema>;
+
+export function getIngestionHistory(
+  limit = 20,
+  signal?: AbortSignal,
+): Promise<{ count: number; items: IngestionLog[] }> {
+  return apiGet(
+    `/gee/ingestion/history?limit=${limit}`,
+    z.object({
+      count: z.number(),
+      items: z.array(ingestionLogSchema),
+    }),
+    signal,
+  ).catch(() => ({ count: 0, items: [] }));
+}

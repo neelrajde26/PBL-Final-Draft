@@ -21,18 +21,17 @@ const I18nContext = createContext<I18nContextType>({
 });
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [language, setLanguageState] = useState<Language>("mr");
-
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("mdis_language") as Language | null;
-      if (saved === "en" || saved === "mr") {
-        setLanguageState(saved);
+  const [language, setLanguageState] = useState<Language>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const saved = localStorage.getItem("mdis_language") as Language | null;
+        if (saved === "en" || saved === "mr") return saved;
+      } catch {
+        // Ignore storage errors
       }
-    } catch {
-      // Ignore storage access errors
     }
-  }, []);
+    return "mr";
+  });
 
   const setLanguage = (lang: Language) => {
     setLanguageState(lang);

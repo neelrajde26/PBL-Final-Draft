@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-import threading
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
+import threading
+import time
 from typing import Any
 
 from app.core.config import Settings, settings as default_settings
@@ -15,7 +16,7 @@ from app.services.gee.gee_auth import (
 
 @dataclass(frozen=True, slots=True)
 class GeeHealth:
-    status: str
+    status: str  # "not_configured" | "configured" | "authenticated" | "connected" | "error"
     configured: bool
     available: bool
     project_id: str | None
@@ -24,6 +25,7 @@ class GeeHealth:
     message: str
     error_category: str | None = None
     remediation: str | None = None
+    is_stale: bool = False
 
     def to_dict(self) -> dict[str, object]:
         return asdict(self)
@@ -55,7 +57,7 @@ def _classify_error(error: Exception, project_id: str | None) -> tuple[str, str,
             )
         return ("configuration_error", msg, "Inspect GEE configuration settings in .env.")
 
-    if "authorize access" in low or "authenticate" in low or "credentials" in low:
+    if "authorize access" in low or "authenticate" in low or "credentials" in low or "not found" in low:
         return (
             "credentials_missing",
             "Application Default Credentials or Earth Engine credentials were not found.",
@@ -73,7 +75,7 @@ def _classify_error(error: Exception, project_id: str | None) -> tuple[str, str,
             "The remote Earth Engine evaluation timed out.",
             "Check internet connectivity and Google Cloud API service status, or increase GEE_REQUEST_TIMEOUT_SECONDS.",
         )
-    if "not found" in low or "404" in low or "collection" in low:
+    if "collection" in low:
         return (
             "collection_access_failure",
             "The requested Earth Engine image collection or asset was not found.",
@@ -88,10 +90,11 @@ def _classify_error(error: Exception, project_id: str | None) -> tuple[str, str,
 
 
 class EarthEngineClient:
-    """Thread-safe, lazy Earth Engine client.
+    """Thread-safe, lazy Earth Engine client with bounded health evaluation.
 
     Importing the FastAPI application never authenticates or makes a remote
-    request. Workers initialize on first use and retain the initialized module.
+    request. Remote checks are bounded with a TTL cache to avoid calling
+    getInfo() on every dashboard refresh.
     """
 
     def __init__(self, settings: Settings = default_settings) -> None:
@@ -100,6 +103,10 @@ class EarthEngineClient:
         self._ee: Any | None = None
         self._auth_method: str | None = None
         self._last_error: Exception | None = None
+        self._cached_remote_health: GeeHealth | None = None
+        self._cached_remote_timestamp: float = 0.0
+        self._cache_ttl_seconds: float = 60.0
+        self._stale_threshold_seconds: float = 300.0
 
     @property
     def configured(self) -> bool:
@@ -134,8 +141,10 @@ class EarthEngineClient:
     def image_collection(self, collection_id: str) -> Any:
         return self.initialize(verify_remote=False).ImageCollection(collection_id)
 
-    def health(self, *, verify_remote: bool = False) -> GeeHealth:
+    def health(self, *, verify_remote: bool = False, force_refresh: bool = False) -> GeeHealth:
         now = datetime.now(UTC).isoformat()
+        current_time = time.monotonic()
+
         if not self.configured:
             return GeeHealth(
                 status="not_configured",
@@ -144,38 +153,100 @@ class EarthEngineClient:
                 project_id=self.settings.gee_project_id,
                 auth_method=None,
                 checked_at=now,
-                message="Earth Engine is not configured; stored observations remain available.",
+                message="Earth Engine project or authentication is not configured.",
                 error_category="not_configured",
                 remediation="Configure GEE_PROJECT_ID and credentials in .env.",
+                is_stale=False,
             )
-        try:
-            self.initialize(verify_remote=verify_remote)
-        except Exception as exc:
-            category, msg, remediation = _classify_error(exc, self.settings.gee_project_id)
-            return GeeHealth(
-                status="error" if category != "dependency_missing" else "dependency_missing",
-                configured=True,
-                available=False,
-                project_id=self.settings.gee_project_id,
-                auth_method=self._auth_method,
-                checked_at=now,
-                message=msg,
-                error_category=category,
-                remediation=remediation,
-            )
-        return GeeHealth(
-            status="connected" if verify_remote else "initialized",
-            configured=True,
-            available=True,
-            project_id=self.settings.gee_project_id,
-            auth_method=self._auth_method,
-            checked_at=now,
-            message=(
-                "Earth Engine authentication and remote evaluation succeeded."
-                if verify_remote
-                else "Earth Engine client initialized; remote evaluation not requested."
-            ),
-        )
+
+        with self._lock:
+            # If verify_remote is requested:
+            if verify_remote:
+                if (
+                    not force_refresh
+                    and self._cached_remote_health is not None
+                    and (current_time - self._cached_remote_timestamp) < self._cache_ttl_seconds
+                ):
+                    return self._cached_remote_health
+
+                try:
+                    self.initialize(verify_remote=True)
+                    health_res = GeeHealth(
+                        status="connected",
+                        configured=True,
+                        available=True,
+                        project_id=self.settings.gee_project_id,
+                        auth_method=self._auth_method,
+                        checked_at=now,
+                        message="Earth Engine authentication and remote evaluation succeeded.",
+                        is_stale=False,
+                    )
+                    self._cached_remote_health = health_res
+                    self._cached_remote_timestamp = current_time
+                    return health_res
+                except Exception as exc:
+                    category, msg, remediation = _classify_error(exc, self.settings.gee_project_id)
+                    health_res = GeeHealth(
+                        status="error",
+                        configured=True,
+                        available=False,
+                        project_id=self.settings.gee_project_id,
+                        auth_method=self._auth_method,
+                        checked_at=now,
+                        message=msg,
+                        error_category=category,
+                        remediation=remediation,
+                        is_stale=False,
+                    )
+                    self._cached_remote_health = health_res
+                    self._cached_remote_timestamp = current_time
+                    return health_res
+
+            # When verify_remote is False:
+            # Check if we already have a cached remote check
+            if self._cached_remote_health is not None:
+                age = current_time - self._cached_remote_timestamp
+                is_stale = age > self._stale_threshold_seconds
+                return GeeHealth(
+                    status=self._cached_remote_health.status,
+                    configured=self._cached_remote_health.configured,
+                    available=self._cached_remote_health.available,
+                    project_id=self._cached_remote_health.project_id,
+                    auth_method=self._cached_remote_health.auth_method,
+                    checked_at=self._cached_remote_health.checked_at,
+                    message=self._cached_remote_health.message,
+                    error_category=self._cached_remote_health.error_category,
+                    remediation=self._cached_remote_health.remediation,
+                    is_stale=is_stale,
+                )
+
+            # No remote check yet: attempt local initialization only
+            try:
+                self.initialize(verify_remote=False)
+                return GeeHealth(
+                    status="authenticated",
+                    configured=True,
+                    available=False,  # available is True ONLY when connected remotely!
+                    project_id=self.settings.gee_project_id,
+                    auth_method=self._auth_method,
+                    checked_at=now,
+                    message="Earth Engine credentials initialized; remote connectivity has not been evaluated.",
+                    is_stale=False,
+                )
+            except Exception as exc:
+                category, msg, remediation = _classify_error(exc, self.settings.gee_project_id)
+                return GeeHealth(
+                    status="error",
+                    configured=True,
+                    available=False,
+                    project_id=self.settings.gee_project_id,
+                    auth_method=self._auth_method,
+                    checked_at=now,
+                    message=msg,
+                    error_category=category,
+                    remediation=remediation,
+                    is_stale=False,
+                )
 
 
 gee_client = EarthEngineClient()

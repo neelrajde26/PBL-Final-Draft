@@ -12,7 +12,9 @@ interface SpeakButtonProps {
 
 export function SpeakButton({ textToSpeak, className = "", title }: SpeakButtonProps) {
   const { language, t } = useI18n();
-  const [supported, setSupported] = useState(false);
+  const [supported] = useState(() => {
+    return typeof window !== "undefined" && "speechSynthesis" in window;
+  });
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [hasMarathiVoice, setHasMarathiVoice] = useState(false);
@@ -20,7 +22,6 @@ export function SpeakButton({ textToSpeak, className = "", title }: SpeakButtonP
 
   useEffect(() => {
     if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      setSupported(true);
       const updateVoices = () => {
         const voices = window.speechSynthesis.getVoices();
         const foundMr = voices.some(

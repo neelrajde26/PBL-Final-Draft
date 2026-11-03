@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_DB: mdis
       POSTGRES_USER: mdis
-      POSTGRES_PASSWORD: mdis_secure_password
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mdis_secure_password}
     ports:
       - "5432:5432"
     volumes:
@@ -40,12 +40,17 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - APP_ENV=${APP_ENV:-production}
+      - DATABASE_URL=postgresql://mdis:${POSTGRES_PASSWORD:-mdis_secure_password}@postgres:5432/mdis
       - REDIS_URL=redis://redis:6379/0
-      - GEE_PROJECT_ID=gee-pbl
-      - ENVIRONMENT=production
-      - JWT_SECRET=mdis_prod_jwt_secret_key_long_and_secure_2024
-      - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      - GEE_PROJECT_ID=${GEE_PROJECT_ID:-gee-pbl}
+      - GEE_SERVICE_ACCOUNT=${GEE_SERVICE_ACCOUNT:-}
+      - GEE_PRIVATE_KEY_PATH=${GEE_PRIVATE_KEY_PATH:-}
+      - GEE_USE_ADC=${GEE_USE_ADC:-true}
+      - AUTH_SECRET=${AUTH_SECRET:-change-this-to-a-secure-random-32-byte-hex-string}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000}
+    volumes:
+      - ${GEE_CREDENTIALS_DIR:-./secrets}:/secrets:ro
     depends_on:
       postgres:
         condition: service_healthy
@@ -60,10 +65,16 @@ services:
     restart: unless-stopped
     command: ["celery", "-A", "app.workers.celery_app", "worker", "-l", "info", "-c", "4"]
     environment:
-      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - APP_ENV=${APP_ENV:-production}
+      - DATABASE_URL=postgresql://mdis:${POSTGRES_PASSWORD:-mdis_secure_password}@postgres:5432/mdis
       - REDIS_URL=redis://redis:6379/0
-      - GEE_PROJECT_ID=gee-pbl
-      - ENVIRONMENT=production
+      - GEE_PROJECT_ID=${GEE_PROJECT_ID:-gee-pbl}
+      - GEE_SERVICE_ACCOUNT=${GEE_SERVICE_ACCOUNT:-}
+      - GEE_PRIVATE_KEY_PATH=${GEE_PRIVATE_KEY_PATH:-}
+      - GEE_USE_ADC=${GEE_USE_ADC:-true}
+      - AUTH_SECRET=${AUTH_SECRET:-change-this-to-a-secure-random-32-byte-hex-string}
+    volumes:
+      - ${GEE_CREDENTIALS_DIR:-./secrets}:/secrets:ro
     depends_on:
       - api
       - postgres
@@ -77,10 +88,16 @@ services:
     restart: unless-stopped
     command: ["celery", "-A", "app.workers.celery_app", "beat", "-l", "info"]
     environment:
-      - DATABASE_URL=postgresql://mdis:mdis_secure_password@postgres:5432/mdis
+      - APP_ENV=${APP_ENV:-production}
+      - DATABASE_URL=postgresql://mdis:${POSTGRES_PASSWORD:-mdis_secure_password}@postgres:5432/mdis
       - REDIS_URL=redis://redis:6379/0
-      - GEE_PROJECT_ID=gee-pbl
-      - ENVIRONMENT=production
+      - GEE_PROJECT_ID=${GEE_PROJECT_ID:-gee-pbl}
+      - GEE_SERVICE_ACCOUNT=${GEE_SERVICE_ACCOUNT:-}
+      - GEE_PRIVATE_KEY_PATH=${GEE_PRIVATE_KEY_PATH:-}
+      - GEE_USE_ADC=${GEE_USE_ADC:-true}
+      - AUTH_SECRET=${AUTH_SECRET:-change-this-to-a-secure-random-32-byte-hex-string}
+    volumes:
+      - ${GEE_CREDENTIALS_DIR:-./secrets}:/secrets:ro
     depends_on:
       - api
       - postgres
@@ -103,4 +120,3 @@ services:
 volumes:
   postgres_data:
   redis_data:
-

@@ -87,11 +87,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // Close mobile drawer on navigation
-  useEffect(() => {
-    setMobileMenuOpen(false);
-  }, [pathname]);
-
   const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value;
     setSelectedDistrict(val);
@@ -234,6 +229,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                       <Link
                         key={href}
                         href={href}
+                        onClick={() => setMobileMenuOpen(false)}
                         className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors ${
                           isActive
                             ? "bg-[var(--raised)] text-[var(--aqua)] font-semibold border-l-2 border-[var(--aqua)]"

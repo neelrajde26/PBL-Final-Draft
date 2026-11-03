@@ -1,9 +1,18 @@
+from unittest.mock import MagicMock, patch
 import pytest
+from fastapi.testclient import TestClient
 
 from app.core.config import Settings
+from app.main import app
 from app.services.gee.district_extractor import InvalidDistrictBoundary, validate_polygon_geometry
 from app.services.gee.gee_client import EarthEngineClient
 from app.services.gee.gee_collections import COLLECTIONS, TemporalResolution
+from app.services.gee.raster_service import (
+    GeeTileCoordinateError,
+    GeeTileUnavailableError,
+    validate_tile_coordinates,
+    raster_service,
+)
 
 
 def test_required_collection_ids_are_registered() -> None:
@@ -39,7 +48,72 @@ def test_unconfigured_health_is_explicit_and_non_fatal() -> None:
     client = EarthEngineClient(
         Settings(gee_project_id=None, gee_use_adc=False, gee_private_key_path=None)
     )
-    health = client.health()
+    health = client.health(verify_remote=False)
     assert health.status == "not_configured"
     assert health.available is False
 
+
+def test_bounded_caching_and_status_semantics() -> None:
+    """Ensure consecutive health queries hit cache and report checked_at."""
+    client = EarthEngineClient(
+        Settings(gee_project_id=None, gee_use_adc=False, gee_private_key_path=None)
+    )
+    h1 = client.health(verify_remote=False)
+    h2 = client.health(verify_remote=False)
+    assert h1.checked_at == h2.checked_at
+    assert h1.is_stale is False
+
+
+def test_distinction_between_authenticated_and_connected() -> None:
+    """Mock local auth success with remote evaluation failure -> error, not connected."""
+    client = EarthEngineClient(
+        Settings(gee_project_id="test-proj", gee_use_adc=True, gee_private_key_path=None)
+    )
+    # Mock ee module
+    mock_ee = MagicMock()
+    mock_ee.Initialize.return_value = None
+    mock_ee.Number.side_effect = RuntimeError("Remote network timeout")
+
+    with patch.dict("sys.modules", {"ee": mock_ee}):
+        health = client.health(verify_remote=True, force_refresh=True)
+        # Must NOT show connected if remote check fails
+        assert health.status in ("error", "authenticated")
+        assert health.status != "connected"
+        assert health.available is False
+
+
+def test_raster_tile_coordinate_validation() -> None:
+    # Valid zoom 6
+    validate_tile_coordinates(6, 45, 28)
+
+    # Negative coordinates
+    with pytest.raises(GeeTileCoordinateError):
+        validate_tile_coordinates(6, -1, 28)
+
+    # Out of bounds x >= 2^6 (64)
+    with pytest.raises(GeeTileCoordinateError):
+        validate_tile_coordinates(6, 64, 28)
+
+    # Out of bounds zoom > 18
+    with pytest.raises(GeeTileCoordinateError):
+        validate_tile_coordinates(19, 100, 100)
+
+
+def test_raster_tile_endpoint_returns_503_when_gee_unconfigured() -> None:
+    client = TestClient(app)
+    response = client.get("/api/maps/raster-tile/rainfall/6/45/28")
+    # Must report 503 unavailable when GEE is offline
+    assert response.status_code == 503
+    assert response.headers.get("X-Tile-Status") == "unavailable"
+
+
+def test_raster_tile_endpoint_returns_404_on_invalid_layer() -> None:
+    client = TestClient(app)
+    response = client.get("/api/maps/raster-tile/invalid_sensor_layer/6/45/28")
+    assert response.status_code == 404
+
+
+def test_raster_tile_endpoint_returns_400_on_invalid_coords() -> None:
+    client = TestClient(app)
+    response = client.get("/api/maps/raster-tile/rainfall/6/-5/28")
+    assert response.status_code == 400

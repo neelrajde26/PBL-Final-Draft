@@ -40,7 +40,7 @@ export function FarmerClient({ districts, initialReports }: Props) {
   const [selectedDistrict, setSelectedDistrict] = useState("beed");
 
   // Advisory state (live backend query)
-  const [advisoryLoading, setAdvisoryLoading] = useState(false);
+  const [advisoryLoading, setAdvisoryLoading] = useState(true);
   const [advisory, setAdvisory] = useState<{
     warning_level: string;
     advisory_text: string;
@@ -75,7 +75,6 @@ export function FarmerClient({ districts, initialReports }: Props) {
   // Load district advisory dynamically on district or language change
   useEffect(() => {
     let active = true;
-    setAdvisoryLoading(true);
     getFarmerAdvisory(selectedDistrict, language)
       .then((res) => {
         if (active) {

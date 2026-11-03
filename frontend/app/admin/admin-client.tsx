@@ -78,7 +78,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
 
   // User governance state
   const [users, setUsers] = useState<AdminUser[]>([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(true);
   const [userError, setUserError] = useState<string | null>(null);
 
   // Farmer reports state
@@ -90,7 +90,6 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
   // Load real users on mount
   useEffect(() => {
     let active = true;
-    setLoadingUsers(true);
     fetch("http://127.0.0.1:8000/api/admin/users", {
       headers: {
         Authorization: "Bearer mock-admin-token", // handled gracefully
