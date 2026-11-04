@@ -15,14 +15,12 @@ export class ApiRequestError extends Error {
 }
 
 export function getApiBase(): string {
-  const configured = typeof window === "undefined"
-    ? process.env.INTERNAL_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL
-    : process.env.NEXT_PUBLIC_API_BASE_URL;
-  if (configured) return configured.replace(/\/$/, "");
-  if (process.env.NODE_ENV === "production") {
-    // Graceful fallback to default development API or relative path
-    return DEFAULT_DEVELOPMENT_API;
+  if (typeof window !== "undefined") {
+    // In browser, prefer same-origin /api to leverage Next.js rewrites and avoid CORS
+    return process.env.NEXT_PUBLIC_API_BASE_URL || "/api";
   }
+  const internal = process.env.INTERNAL_API_BASE_URL || process.env.NEXT_PUBLIC_API_BASE_URL;
+  if (internal) return internal.replace(/\/$/, "");
   return DEFAULT_DEVELOPMENT_API;
 }
 
@@ -280,6 +278,10 @@ export function getDistricts(signal?: AbortSignal): Promise<DistrictResponse> {
   return apiGet("/districts", districtResponseSchema, signal);
 }
 
+export function getDistrict(id: string, signal?: AbortSignal): Promise<District> {
+  return apiGet(`/districts/${encodeURIComponent(id)}`, districtSchema, signal);
+}
+
 export function getDistrictBoundaries(signal?: AbortSignal): Promise<DistrictBoundaryCollection> {
   return apiGet("/districts/boundaries", boundaryCollectionSchema, signal);
 }
@@ -517,6 +519,39 @@ export function getIngestionHistory(
     z.object({
       count: z.number(),
       items: z.array(ingestionLogSchema),
+    }),
+    signal,
+  ).catch(() => ({ count: 0, items: [] }));
+}
+
+export const droughtIndexSchema = z.object({
+  id: z.string(),
+  district_id: z.string(),
+  index_key: z.string(),
+  drought_domain: z.string(),
+  observation_date: z.string(),
+  accumulation_months: z.number().nullable().optional(),
+  value: z.number(),
+  category: z.string(),
+  method_version: z.string().nullable().optional(),
+  quality_status: z.string().nullable().optional(),
+});
+export type DroughtIndexItem = z.infer<typeof droughtIndexSchema>;
+
+export function getDroughtIndices(
+  districtId?: string,
+  domain?: string,
+  signal?: AbortSignal,
+): Promise<{ count: number; items: DroughtIndexItem[]; status?: string }> {
+  const p = new URLSearchParams();
+  if (districtId) p.set("district_id", districtId);
+  if (domain) p.set("domain", domain);
+  return apiGet(
+    `/drought/indices?${p.toString()}`,
+    z.object({
+      count: z.number(),
+      items: z.array(droughtIndexSchema),
+      status: z.string().optional(),
     }),
     signal,
   ).catch(() => ({ count: 0, items: [] }));

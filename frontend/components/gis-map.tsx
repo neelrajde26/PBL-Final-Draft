@@ -123,13 +123,28 @@ export function GisMap({
       setLoading(true);
       setError(null);
       try {
-        const [boundRes, indRes] = await Promise.all([
+        const [boundResult, indResult] = await Promise.allSettled([
           getDistrictBoundaries(),
           getDistrictIndicators(activeLayerId),
         ]);
         if (!active) return;
-        setBoundaries(boundRes);
-        setIndicatorData(indRes);
+
+        if (boundResult.status === "fulfilled") {
+          setBoundaries(boundResult.value);
+        } else {
+          setError(
+            boundResult.reason instanceof Error
+              ? boundResult.reason.message
+              : "Failed to load Maharashtra boundaries.",
+          );
+        }
+
+        if (indResult.status === "fulfilled") {
+          setIndicatorData(indResult.value);
+        } else {
+          // Gracefully continue in boundary-only geometry mode
+          setIndicatorData(null);
+        }
       } catch (err: unknown) {
         if (!active) return;
         setError(err instanceof Error ? err.message : "Failed to load GIS data.");
@@ -303,16 +318,37 @@ export function GisMap({
     };
   }, [boundaries]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // ResizeObserver to ensure MapLibre canvas never renders with 0x0 dimensions
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const ro = new ResizeObserver(() => {
+      mapRef.current?.resize();
+    });
+    ro.observe(containerRef.current);
+    return () => ro.disconnect();
+  }, []);
+
   // Update GeoJSON source when indicatorData updates
   useEffect(() => {
     const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
+    if (!map) return;
 
-    const source = map.getSource("districts") as GeoJSONSource | undefined;
-    if (source && indicatorData) {
-      source.setData(indicatorData as unknown as FeatureCollection<MultiPolygon>);
+    const updateSource = () => {
+      const source = map.getSource("districts") as GeoJSONSource | undefined;
+      if (source) {
+        const data = (indicatorData || boundaries) as unknown as FeatureCollection<MultiPolygon>;
+        if (data) {
+          source.setData(data);
+        }
+      }
+    };
+
+    if (map.isStyleLoaded()) {
+      updateSource();
+    } else {
+      map.once("load", updateSource);
     }
-  }, [indicatorData]);
+  }, [indicatorData, boundaries]);
 
   // Update styles on selectedId, filteredDistrictIds, or activeLayer change
   useEffect(() => {

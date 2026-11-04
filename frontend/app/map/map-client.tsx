@@ -9,7 +9,19 @@ const GisMap = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="map-loading" style={{ height: "calc(100vh - 40px)" }}>
+      <div
+        className="map-loading"
+        style={{
+          height: "calc(100vh - 64px)",
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "#070a0e",
+          color: "#22d3ee",
+          fontSize: "13px",
+        }}
+      >
         Initializing WebGL GIS engine & Maharashtra boundaries…
       </div>
     ),
@@ -18,9 +30,16 @@ const GisMap = dynamic(
 
 export function MapClient({ layers }: { layers: MapLayer[] }) {
   return (
-    <div style={{ height: "calc(100vh - 2px)", width: "100%", position: "relative" }}>
+    <div
+      style={{
+        height: "calc(100vh - 64px)",
+        width: "100%",
+        position: "relative",
+        display: "flex",
+        overflow: "hidden",
+      }}
+    >
       <GisMap layers={layers} initialLayer="rainfall" />
     </div>
   );
 }
-

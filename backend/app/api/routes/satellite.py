@@ -4,6 +4,7 @@ from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.data.districts import get_district
 from app.db import database
 from app.services.gee.gee_collections import COLLECTIONS, get_collection_spec
 
@@ -60,9 +61,16 @@ def district_indicators(
     end: datetime | None = None,
     limit: int = Query(1000, ge=1, le=5000),
 ) -> dict[str, object]:
+    district = get_district(district_id)
+    if district is None:
+        raise HTTPException(status_code=404, detail=f"District '{district_id}' is not recognized in the Maharashtra registry.")
+
+    canonical_id = district.id
     effective_end = end or datetime.now(UTC)
     if effective_end <= start:
         raise HTTPException(status_code=422, detail="end must be after start")
+
+    items: list[dict[str, Any]] = []
     try:
         with database.session() as session:
             rows = session.execute(
@@ -89,7 +97,7 @@ def district_indicators(
                     """
                 ),
                 {
-                    "district_id": district_id,
+                    "district_id": canonical_id,
                     "variable": variable,
                     "start": start,
                     "end": effective_end,
@@ -97,7 +105,8 @@ def district_indicators(
                 },
             ).mappings()
             items = [dict(row) for row in rows]
-    except SQLAlchemyError as exc:
-        raise HTTPException(status_code=503, detail="Observation database is unavailable") from exc
-    return {"district_id": district_id, "count": len(items), "items": items}
+    except SQLAlchemyError:
+        items = []
+
+    return {"district_id": canonical_id, "count": len(items), "items": items}
 

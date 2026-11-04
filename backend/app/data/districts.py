@@ -27,7 +27,7 @@ class District:
 
 _ROWS: tuple[tuple[str, str, str, tuple[str, ...], bool], ...] = (
     # Konkan
-    ("mumbai-city", "Mumbai City", "Konkan", (), False),
+    ("mumbai-city", "Mumbai City", "Konkan", ("Mumbai",), False),
     ("mumbai-suburban", "Mumbai Suburban", "Konkan", (), False),
     ("thane", "Thane", "Konkan", (), False),
     ("palghar", "Palghar", "Konkan", (), False),
@@ -89,11 +89,42 @@ DISTRICTS: tuple[District, ...] = tuple(
 )
 
 _BY_ID = {district.id: district for district in DISTRICTS}
-_BY_CODE = {district.code: district for district in DISTRICTS}
+_BY_CODE = {district.code.upper(): district for district in DISTRICTS}
+
+# Build comprehensive lookup index for casing, aliases, hyphens/underscores
+_LOOKUP: dict[str, District] = {}
+for district in DISTRICTS:
+    _LOOKUP[district.id] = district
+    _LOOKUP[district.id.replace("-", "_")] = district
+    _LOOKUP[district.id.replace("_", "-")] = district
+    _LOOKUP[district.code.lower()] = district
+    _LOOKUP[district.code.upper()] = district
+    _LOOKUP[district.name.lower()] = district
+    _LOOKUP[district.name.lower().replace(" ", "-")] = district
+    _LOOKUP[district.name.lower().replace(" ", "_")] = district
+    for leg in district.legacy_names:
+        _LOOKUP[leg.lower()] = district
+        _LOOKUP[leg.lower().replace(" ", "-")] = district
+        _LOOKUP[leg.lower().replace(" ", "_")] = district
 
 
 def get_district(identifier: str) -> District | None:
-    return _BY_ID.get(identifier) or _BY_CODE.get(identifier.upper())
+    """Look up district by canonical ID, code, alias, legacy name, or casing variant."""
+    if not identifier:
+        return None
+    raw = str(identifier).strip()
+    if raw in _LOOKUP:
+        return _LOOKUP[raw]
+    low = raw.lower()
+    if low in _LOOKUP:
+        return _LOOKUP[low]
+    norm_hyphen = low.replace("_", "-")
+    if norm_hyphen in _LOOKUP:
+        return _LOOKUP[norm_hyphen]
+    norm_under = low.replace("-", "_")
+    if norm_under in _LOOKUP:
+        return _LOOKUP[norm_under]
+    return _BY_ID.get(low) or _BY_CODE.get(raw.upper())
 
 
 def validate_registry() -> None:
@@ -117,4 +148,3 @@ def validate_registry() -> None:
 
 
 validate_registry()
-
