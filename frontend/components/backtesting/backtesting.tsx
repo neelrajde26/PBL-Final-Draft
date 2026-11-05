@@ -1,12 +1,13 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bar, CartesianGrid, ComposedChart, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import { stateShape } from "@/components/landing/state-mark";
 import { useSelectedDistrict } from "@/components/shell";
 import { Awaiting, fmtDate, fmtPct, Kpi, PageHeader, Panel, Skeleton } from "@/components/ui/app-ui";
+import { useLoad } from "@/lib/use-load";
 import { getBacktestMap, getBacktestSeries, getBacktestSummary, type BacktestPoint, type BacktestSummary } from "@/lib/api";
 
 const DOMAINS = [
@@ -34,32 +35,15 @@ function outcome(p: number, a: number) {
 export function Backtesting() {
   const districtId = useSelectedDistrict();
   const [domain, setDomain] = useState(DOMAINS[0].id);
-  const [summary, setSummary] = useState<BacktestSummary | null>(null);
-  const [series, setSeries] = useState<BacktestPoint[] | null>(null);
-  const [mapData, setMapData] = useState<Awaited<ReturnType<typeof getBacktestMap>> | null>(null);
   const [mapDate, setMapDate] = useState<string | undefined>();
   const [mapMode, setMapMode] = useState<"actual" | "predicted" | "error">("error");
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const c = new AbortController();
-    setSummary(null);
-    getBacktestSummary(domain, c.signal).then(setSummary).catch(() => !c.signal.aborted && setFailed(true));
-    return () => c.abort();
-  }, [domain]);
-
-  useEffect(() => {
-    const c = new AbortController();
-    setSeries(null);
-    getBacktestSeries(districtId, domain, c.signal).then((r) => setSeries(r.items ?? [])).catch(() => !c.signal.aborted && setSeries([]));
-    return () => c.abort();
-  }, [districtId, domain]);
-
-  useEffect(() => {
-    const c = new AbortController();
-    getBacktestMap(domain, mapDate, c.signal).then(setMapData).catch(() => {});
-    return () => c.abort();
-  }, [domain, mapDate]);
+  const summaryLoad = useLoad<BacktestSummary>(`sum:${domain}`, (s) => getBacktestSummary(domain, s));
+  const seriesLoad = useLoad(`ser:${domain}:${districtId}`, (s) => getBacktestSeries(districtId, domain, s));
+  const mapLoad = useLoad(`map:${domain}:${mapDate ?? ""}`, (s) => getBacktestMap(domain, mapDate, s));
+  const summary = summaryLoad.data;
+  const failed = summaryLoad.error;
+  const series: BacktestPoint[] | null = seriesLoad.data ? seriesLoad.data.items ?? [] : seriesLoad.error ? [] : null;
+  const mapData = mapLoad.data;
 
   const ready = summary?.status === "available";
   const o = summary?.overall;
@@ -76,7 +60,7 @@ export function Backtesting() {
       >
         <div className="ap-seg" role="group" aria-label="Drought type">
           {DOMAINS.map((d) => (
-            <button key={d.id} type="button" aria-pressed={domain === d.id} onClick={() => setDomain(d.id)}>
+            <button key={d.id} type="button" aria-pressed={domain === d.id} onClick={() => { setDomain(d.id); setMapDate(undefined); }}>
               {d.label}
             </button>
           ))}

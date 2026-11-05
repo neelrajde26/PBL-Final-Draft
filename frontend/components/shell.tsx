@@ -27,6 +27,7 @@ import { Suspense, useEffect, useState } from "react";
 
 import { StateMark } from "@/components/landing/state-mark";
 import { getDistricts, getGeeJobs, getReadiness, type District, type Readiness } from "@/lib/api";
+import { storeDistrict, useStoredDistrict } from "@/lib/use-load";
 import { useI18n } from "@/lib/i18n";
 
 type NavItem = {
@@ -64,8 +65,6 @@ const GROUPS: { key: NavItem["group"]; en: string; mr: string }[] = [
   { key: "about", en: "Data & method", mr: "डेटा व पद्धत" },
 ];
 
-const DISTRICT_KEY = "mdis_district";
-
 function timeAgo(iso: string | null | undefined) {
   if (!iso) return null;
   const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
@@ -85,16 +84,8 @@ function ShellInner({ children }: { children: React.ReactNode }) {
   const [apiDown, setApiDown] = useState(false);
   const [lastSync, setLastSync] = useState<string | null>(null);
   const [districts, setDistricts] = useState<District[]>([]);
-  const [district, setDistrict] = useState("beed");
-
-  useEffect(() => {
-    const fromUrl = params.get("district");
-    let saved: string | null = null;
-    try {
-      saved = localStorage.getItem(DISTRICT_KEY);
-    } catch {}
-    setDistrict(fromUrl || saved || "beed");
-  }, [params]);
+  const saved = useStoredDistrict();
+  const district = params.get("district") || saved || "beed";
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -105,15 +96,10 @@ function ShellInner({ children }: { children: React.ReactNode }) {
     return () => ctrl.abort();
   }, []);
 
-  useEffect(() => setMenuOpen(false), [pathname]);
-
   if (pathname === "/") return <>{children}</>;
 
   const chooseDistrict = (id: string) => {
-    setDistrict(id);
-    try {
-      localStorage.setItem(DISTRICT_KEY, id);
-    } catch {}
+    storeDistrict(id);
     const q = new URLSearchParams(params.toString());
     q.set("district", id);
     router.push(`${pathname}?${q.toString()}`);
@@ -183,7 +169,7 @@ function ShellInner({ children }: { children: React.ReactNode }) {
                   .map(({ href, labelKey, icon: Icon }) => {
                     const active = pathname === href || pathname.startsWith(`${href}/`);
                     return (
-                      <Link key={href} href={href} className={`sh-link ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                      <Link key={href} href={href} onClick={() => setMenuOpen(false)} className={`sh-link ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
                         {active && <motion.span layoutId="sh-pill" className="sh-pill" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
                         <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
                         <span>{t(labelKey)}</span>
@@ -230,13 +216,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
 /** The district chosen in the top bar, read from the URL or the last choice. */
 export function useSelectedDistrict(fallback = "beed") {
   const params = useSearchParams();
-  const [id, setId] = useState(fallback);
-  useEffect(() => {
-    let saved: string | null = null;
-    try {
-      saved = localStorage.getItem(DISTRICT_KEY);
-    } catch {}
-    setId(params.get("district") || saved || fallback);
-  }, [params, fallback]);
-  return id;
+  const saved = useStoredDistrict();
+  return params.get("district") || saved || fallback;
 }

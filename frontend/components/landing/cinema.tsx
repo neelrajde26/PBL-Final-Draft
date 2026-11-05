@@ -62,7 +62,9 @@ export function Timecode() {
 export function TitleSequence({ onDone }: { onDone: () => void }) {
   const reduce = useReducedMotion();
   const done = useRef(onDone);
-  done.current = onDone;
+  useEffect(() => {
+    done.current = onDone;
+  }, [onDone]);
   useEffect(() => {
     const t = setTimeout(() => done.current(), reduce ? 0 : 3000);
     return () => clearTimeout(t);

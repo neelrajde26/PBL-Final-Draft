@@ -15,6 +15,7 @@ import {
   type IndicatorCollection,
   type Readiness,
 } from "@/lib/api";
+import { useLoad } from "@/lib/use-load";
 import "./landing.css";
 import "./cinema.css";
 
@@ -98,8 +99,9 @@ export function Landing() {
   const [readiness, setReadiness] = useState<Readiness | null>(null);
   const [apiDown, setApiDown] = useState(false);
   const [active, setActive] = useState(INDICATORS[0]);
-  const [layer, setLayer] = useState<IndicatorCollection | null>(null);
-  const [layerState, setLayerState] = useState<"loading" | "ok" | "error">("loading");
+  const layerLoad = useLoad<IndicatorCollection>(`layer:${active.id}`, (s) => getDistrictIndicators(active.id, undefined, undefined, s));
+  const layer = layerLoad.data;
+  const layerState: "loading" | "ok" | "error" = layer ? "ok" : layerLoad.error ? "error" : "loading";
 
   useEffect(() => {
     const ctrl = new AbortController();
@@ -111,19 +113,6 @@ export function Landing() {
     return () => ctrl.abort();
   }, []);
 
-  useEffect(() => {
-    const ctrl = new AbortController();
-    setLayerState("loading");
-    getDistrictIndicators(active.id, undefined, undefined, ctrl.signal)
-      .then((r) => {
-        setLayer(r);
-        setLayerState("ok");
-      })
-      .catch((e) => {
-        if (e?.name !== "AbortError" && !ctrl.signal.aborted) setLayerState("error");
-      });
-    return () => ctrl.abort();
-  }, [active]);
 
   const values = useMemo(() => {
     const m = new Map<string, number>();

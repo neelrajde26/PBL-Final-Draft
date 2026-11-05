@@ -3,7 +3,9 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
+
+import { useLoad } from "@/lib/use-load";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, Legend } from "recharts";
 
 import { useSelectedDistrict } from "@/components/shell";
@@ -14,19 +16,6 @@ import {
 } from "@/lib/api";
 
 const GisMap = dynamic(() => import("@/components/gis-map").then((m) => m.GisMap), { ssr: false, loading: () => <Skeleton h={560} /> });
-
-type Load<T> = { data: T | null; error: boolean };
-function useLoad<T>(fn: (s: AbortSignal) => Promise<T>, deps: unknown[]): Load<T> {
-  const [state, setState] = useState<Load<T>>({ data: null, error: false });
-  useEffect(() => {
-    const ctrl = new AbortController();
-    setState({ data: null, error: false });
-    fn(ctrl.signal).then((data) => setState({ data, error: false })).catch(() => !ctrl.signal.aborted && setState({ data: null, error: true }));
-    return () => ctrl.abort();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, deps);
-  return state;
-}
 
 const TRENDS = [
   { v: "rainfall", title: "Rainfall", unit: "mm/month", color: "#3fe0ff", kind: "bar" as const, note: "CHIRPS, monthly total" },
@@ -71,19 +60,19 @@ function Trend({ series, color, kind, unit }: { series: Series | null; color: st
 
 export function Overview() {
   const districtId = useSelectedDistrict();
-  const districts = useLoad<{ items: District[] }>((s) => getDistricts(s), []);
-  const coverage = useLoad<Coverage>((s) => getCoverage(s), []);
-  const jobs = useLoad<GeeJobs>((s) => getGeeJobs(s), []);
-  const report = useLoad<ModelReport>((s) => getModelReport(s), []);
-  const preds = useLoad<{ items: PredictionItem[] }>((s) => getPredictions("30d", undefined, s), []);
-  const alerts = useLoad<{ items: Alert[] }>((s) => getAlerts(undefined, undefined, "en", s), []);
-  const backtest = useLoad<BacktestSummary>((s) => getBacktestSummary("meteorological", s), []);
-  const layers = useLoad<{ items: MapLayer[] }>((s) => getMapLayers(s), []);
+  const districts = useLoad<{ items: District[] }>("districts", (s) => getDistricts(s));
+  const coverage = useLoad<Coverage>("coverage", (s) => getCoverage(s));
+  const jobs = useLoad<GeeJobs>("jobs", (s) => getGeeJobs(s));
+  const report = useLoad<ModelReport>("report", (s) => getModelReport(s));
+  const preds = useLoad<{ items: PredictionItem[] }>("preds", (s) => getPredictions("30d", undefined, s));
+  const alerts = useLoad<{ items: Alert[] }>("alerts", (s) => getAlerts(undefined, undefined, "en", s));
+  const backtest = useLoad<BacktestSummary>("backtest", (s) => getBacktestSummary("meteorological", s));
+  const layers = useLoad<{ items: MapLayer[] }>("layers", (s) => getMapLayers(s));
   const series = {
-    rainfall: useLoad<Series>((s) => getSeries(districtId, "rainfall", 2019, undefined, s), [districtId]),
-    ndvi: useLoad<Series>((s) => getSeries(districtId, "ndvi", 2019, undefined, s), [districtId]),
-    lst: useLoad<Series>((s) => getSeries(districtId, "lst", 2019, undefined, s), [districtId]),
-    soil_moisture: useLoad<Series>((s) => getSeries(districtId, "soil_moisture", 2019, undefined, s), [districtId]),
+    rainfall: useLoad<Series>(`rainfall:${districtId}`, (s) => getSeries(districtId, "rainfall", 2019, undefined, s)),
+    ndvi: useLoad<Series>(`ndvi:${districtId}`, (s) => getSeries(districtId, "ndvi", 2019, undefined, s)),
+    lst: useLoad<Series>(`lst:${districtId}`, (s) => getSeries(districtId, "lst", 2019, undefined, s)),
+    soil_moisture: useLoad<Series>(`soil_moisture:${districtId}`, (s) => getSeries(districtId, "soil_moisture", 2019, undefined, s)),
   };
 
   const district = districts.data?.items.find((d) => d.id === districtId);
