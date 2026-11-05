@@ -42,30 +42,53 @@ class AlertEngine:
         self._seed_default_alerts()
 
     def _seed_default_alerts(self) -> None:
-        defaults = [
-            self.create_alert(
-                district_id="beed",
-                district_name="Beed",
-                warning_level="high_risk",
-                trigger_reason="Extended dry spell exceeding 21 days; VHI dropped to 26.8",
-                environmental_drivers=["CHIRPS Rainfall Deficit (-48%)", "MODIS VHI Stress (26.8)", "SMAP Moisture Deficit"],
-            ),
-            self.create_alert(
-                district_id="dharashiv",
-                district_name="Dharashiv",
-                warning_level="increasing_stress",
-                trigger_reason="Rainfall deficit of 38% over the past 30 days",
-                environmental_drivers=["Rainfall Deficit (-38%)", "Root-zone Soil Moisture 0.14 m3/m3"],
-            ),
-            self.create_alert(
-                district_id="solapur",
-                district_name="Solapur",
-                warning_level="watch",
-                trigger_reason="SPI-1 dropped to -1.15; thermal stress rising",
-                environmental_drivers=["MODIS LST Anomaly (+2.4 degC)", "SPI-1 (-1.15)"],
-            ),
-        ]
-        self._alerts.extend(defaults)
+        """Alerts are derived from measured indices only (see refresh_from_store); none are seeded."""
+        self._store_stamp: float | None = None
+
+    def refresh_from_store(self) -> None:
+        """Rebuild alerts from the latest real index per district whenever the derived file changes.
+
+        Rules (WMO SPI categories; Kogan VHI): SPI-3 <= -2 severe_risk, <= -1.5 high_risk,
+        <= -1 increasing_stress; VHI < 35 at least high_risk, VHI < 40 at least watch.
+        """
+        from app.services import store
+
+        path = store.DERIVED / "district_indices.csv"
+        stamp = path.stat().st_mtime if path.exists() else None
+        if stamp == self._store_stamp:
+            return
+        self._store_stamp = stamp
+        self._alerts = [a for a in self._alerts if a.source_quality != "derived_from_indices"]
+        df = store.frame("indices")
+        if df.empty:
+            return
+        from app.data.districts import get_district
+
+        rank = ["watch", "increasing_stress", "high_risk", "severe_risk"]
+        latest = df.sort_values("date").groupby("district_id").tail(1)
+        for r in latest.itertuples():
+            levels, reasons, drivers = [], [], []
+            spi3 = getattr(r, "spi_3", float("nan"))
+            vhi = getattr(r, "vhi", float("nan"))
+            if spi3 == spi3 and spi3 <= -1:
+                levels.append("severe_risk" if spi3 <= -2 else "high_risk" if spi3 <= -1.5 else "increasing_stress")
+                reasons.append(f"SPI-3 at {spi3:.2f}")
+                drivers.append(f"SPI-3 {spi3:.2f} (CHIRPS)")
+            if vhi == vhi and vhi < 40:
+                levels.append("high_risk" if vhi < 35 else "watch")
+                reasons.append(f"VHI at {vhi:.1f}")
+                drivers.append(f"VHI {vhi:.1f} (MODIS)")
+            if not levels:
+                continue
+            d = get_district(r.district_id)
+            alert = self.create_alert(
+                district_id=r.district_id, district_name=d.name if d else r.district_id,
+                warning_level=max(levels, key=rank.index), trigger_reason="; ".join(reasons),
+                environmental_drivers=drivers, prediction_horizon="observed", model_version="indices-2.0",
+            )
+            alert.observation_date = r.date.date().isoformat()
+            alert.source_quality = "derived_from_indices"
+            self._alerts.append(alert)
 
     def create_alert(
         self,
@@ -152,6 +175,7 @@ class AlertEngine:
         district_id: str | None = None,
         warning_level: str | None = None,
     ) -> list[dict[str, Any]]:
+        self.refresh_from_store()
         return [
             a.to_dict()
             for a in self._alerts

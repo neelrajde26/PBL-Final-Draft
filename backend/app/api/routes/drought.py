@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
+
+from app.services import store
 from sqlalchemy import text
 
 from app.data.districts import get_district
@@ -44,57 +46,33 @@ def list_drought_indices(
         pass
 
     if not items:
-        from pathlib import Path
-        import pandas as pd
-        csv_path = Path("backend/data/processed/maharashtra_drought_features_2000_2023.csv")
-        if not csv_path.is_file():
-            csv_path = Path(__file__).parents[3] / "backend" / "data" / "processed" / "maharashtra_drought_features_2000_2023.csv"
-        if csv_path.is_file():
-            try:
-                df = pd.read_csv(csv_path)
-                if district_id:
-                    df = df[df["district_id"] == district_id]
-                # Sort latest first
-                df = df.sort_values("date", ascending=False)
-                sample = df.head(100)
-                for _, r in sample.iterrows():
-                    d_id = str(r["district_id"])
-                    dt_str = str(r["date"])
-                    if domain is None or domain == "meteorological":
-                        s3 = float(r["spi_3"])
-                        items.append({
-                            "id": f"idx-spi3-{d_id}-{dt_str}",
-                            "district_id": d_id,
-                            "index_key": "spi_3",
-                            "drought_domain": "meteorological",
-                            "observation_date": dt_str,
-                            "accumulation_months": 3,
-                            "value": round(s3, 3),
-                            "category": classify_drought_severity(s3),
-                            "method_version": "v1.0.0",
-                            "quality_status": "verified_historical",
-                        })
-                    if domain is None or domain == "agricultural":
-                        vhi = float(r["vhi"])
-                        items.append({
-                            "id": f"idx-vhi-{d_id}-{dt_str}",
-                            "district_id": d_id,
-                            "index_key": "vhi",
-                            "drought_domain": "agricultural",
-                            "observation_date": dt_str,
-                            "accumulation_months": 1,
-                            "value": round(vhi, 2),
-                            "category": "Severe Agricultural Drought" if vhi <= 20 else ("Moderate Agricultural Drought" if vhi <= 35 else "Normal"),
-                            "method_version": "v1.0.0",
-                            "quality_status": "verified_historical",
-                        })
-            except Exception:
-                pass
+        df = store.frame("indices")
+        if not df.empty:
+            if district_id:
+                df = df[df["district_id"] == district_id]
+            df = df.sort_values("date", ascending=False).head(200)
+            for r in df.itertuples():
+                dt = r.date.date().isoformat()
+                if domain in (None, "meteorological") and hasattr(r, "spi_3") and r.spi_3 == r.spi_3:
+                    items.append({
+                        "id": f"idx-spi3-{r.district_id}-{dt}", "district_id": r.district_id, "index_key": "spi_3",
+                        "drought_domain": "meteorological", "observation_date": dt, "accumulation_months": 3,
+                        "value": round(float(r.spi_3), 3), "category": classify_drought_severity(float(r.spi_3)),
+                        "method_version": "pipeline-2.0", "quality_status": "gee_extract",
+                    })
+                if domain in (None, "agricultural") and hasattr(r, "vhi") and r.vhi == r.vhi:
+                    items.append({
+                        "id": f"idx-vhi-{r.district_id}-{dt}", "district_id": r.district_id, "index_key": "vhi",
+                        "drought_domain": "agricultural", "observation_date": dt, "accumulation_months": 1,
+                        "value": round(float(r.vhi), 2),
+                        "category": "Severe Agricultural Drought" if r.vhi <= 20 else ("Moderate Agricultural Drought" if r.vhi < 35 else "Normal"),
+                        "method_version": "pipeline-2.0", "quality_status": "gee_extract",
+                    })
 
     return {
         "count": len(items),
         "items": items,
-        "status": "data_available" if items else "no_stored_records",
+        "status": "data_available" if items else "awaiting_ingestion",
     }
 
 
@@ -129,28 +107,16 @@ def district_drought_series(
         pass
 
     if not records:
-        from pathlib import Path
-        import pandas as pd
-        csv_path = Path("backend/data/processed/maharashtra_drought_features_2000_2023.csv")
-        if not csv_path.is_file():
-            csv_path = Path(__file__).parents[3] / "backend" / "data" / "processed" / "maharashtra_drought_features_2000_2023.csv"
-        if csv_path.is_file():
-            try:
-                df = pd.read_csv(csv_path)
-                dist_df = df[df["district_id"] == district.id].sort_values("date", ascending=False).head(limit)
-                for _, r in dist_df.iterrows():
-                    s3 = float(r["spi_3"])
-                    records.append({
-                        "index_key": "spi_3",
-                        "drought_domain": "meteorological",
-                        "observation_date": str(r["date"]),
-                        "accumulation_months": 3,
-                        "value": round(s3, 3),
-                        "category": classify_drought_severity(s3),
-                        "method_version": "v1.0.0",
-                    })
-            except Exception:
-                pass
+        df = store.frame("indices")
+        if not df.empty and "spi_3" in df:
+            sel = df[df["district_id"] == district.id].dropna(subset=["spi_3"]).sort_values("date", ascending=False).head(limit)
+            for r in sel.itertuples():
+                records.append({
+                    "index_key": "spi_3", "drought_domain": "meteorological",
+                    "observation_date": r.date.date().isoformat(), "accumulation_months": 3,
+                    "value": round(float(r.spi_3), 3), "category": classify_drought_severity(float(r.spi_3)),
+                    "method_version": "pipeline-2.0",
+                })
 
     return {
         "district_id": district.id,

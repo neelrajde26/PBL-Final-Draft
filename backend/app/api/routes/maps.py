@@ -6,6 +6,7 @@ from datetime import datetime
 import json
 from typing import Any
 
+from app.services import store
 from fastapi import APIRouter, HTTPException, Query, Response
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
@@ -297,83 +298,41 @@ def district_indicators_geojson(
         # Graceful handling when database is not connected
         pass
 
-    # Fallback to local verified boundary geometries if database was unavailable
+    # Without a database, serve boundaries from the canonical GeoJSON and values from the
+    # Earth Engine extracts on disk. Nothing is substituted when no extract exists.
     if not stored_boundaries:
-        from pathlib import Path
-        candidate_paths = [
-            Path(__file__).resolve().parents[3] / "data" / "boundaries" / "maharashtra_36_districts.geojson",
-            Path("backend/data/boundaries/maharashtra_36_districts.geojson"),
-            Path(__file__).resolve().parent.parent.parent / "data" / "boundaries" / "maharashtra_36_districts.geojson",
-        ]
-        for p in candidate_paths:
-            if p.is_file():
-                try:
-                    raw = json.loads(p.read_text(encoding="utf-8"))
-                    for feat in raw.get("features", []):
-                        d_id = feat.get("properties", {}).get("district_id")
-                        if d_id in district_ids:
-                            stored_boundaries[d_id] = {
-                                "district_id": d_id,
-                                "geometry": json.dumps(feat.get("geometry")),
-                                "centroid_lon": feat.get("properties", {}).get("centroid_lon", 76.5),
-                                "centroid_lat": feat.get("properties", {}).get("centroid_lat", 19.0),
-                                "boundary_version": feat.get("properties", {}).get("boundary_version", "soi-abdb-2025"),
-                                "source_name": "Survey of India (ABDB)",
-                            }
-                    break
-                except Exception:
-                    pass
-
-    # Fallback to preprocessed verified observation series if database was unavailable
-    if not stored_values:
-        from pathlib import Path
-        import pandas as pd
-        csv_path = Path("backend/data/processed/maharashtra_drought_features_2000_2023.csv")
-        if not csv_path.is_file():
-            csv_path = Path(__file__).parents[3] / "backend" / "data" / "processed" / "maharashtra_drought_features_2000_2023.csv"
-        if csv_path.is_file():
-            try:
-                df = pd.read_csv(csv_path)
-                col_map = {
-                    "rainfall": "rainfall",
-                    "rainfall_anomaly": "rainfall",
-                    "rainfall_deficit": "rainfall",
-                    "spi_1": "spi_1",
-                    "spi_3": "spi_3",
-                    "spi_6": "spi_3",
-                    "spei": "spi_3",
-                    "ndvi": "ndvi",
-                    "vci": "vci",
-                    "vhi": "vhi",
-                    "lst": "lst",
-                    "soil_moisture": "soil_moisture",
-                    "soil_moisture_anomaly": "soil_moisture_anomaly",
+        for d_id, feat in store.boundaries().items():
+            if d_id in district_ids:
+                props = feat.get("properties", {})
+                stored_boundaries[d_id] = {
+                    "district_id": d_id,
+                    "geometry": feat.get("geometry"),
+                    "centroid_lon": props.get("centroid_lon"),
+                    "centroid_lat": props.get("centroid_lat"),
+                    "boundary_version": props.get("boundary_version", "soi-abdb-2025"),
+                    "source_name": "Survey of India (ABDB)",
                 }
-                var_col = col_map.get(indicator)
-                if var_col and var_col in df.columns:
-                    latest_date = df["date"].max()
-                    latest_slice = df[df["date"] == latest_date]
-                    for _, row in latest_slice.iterrows():
-                        d_id = str(row["district_id"])
-                        if d_id in district_ids:
-                            val = float(row[var_col])
-                            stored_values[d_id] = {
-                                "district_id": d_id,
-                                "mean_value": val,
-                                "unit": layer_meta["unit"],
-                                "observation_time": datetime.fromisoformat(str(row["date"])),
-                                "coverage_percentage": 98.5,
-                                "quality_status": "verified_historical",
-                                "source_name": layer_meta["source"],
-                            }
-            except Exception:
-                pass
+
+    if not stored_values:
+        values, _ = store.latest_values(indicator)
+        for d_id, v in values.items():
+            if d_id in district_ids:
+                stored_values[d_id] = {
+                    "district_id": d_id,
+                    "mean_value": v["value"],
+                    "unit": v["unit"],
+                    "observation_time": v["date"].to_pydatetime(),
+                    "coverage_percentage": None,
+                    "quality_status": "gee_extract",
+                    "source_name": v["source"],
+                }
 
     for d in districts:
         b_info = stored_boundaries.get(d.id)
         obs = stored_values.get(d.id)
 
-        geom = json.loads(b_info["geometry"]) if b_info and b_info.get("geometry") else None
+        raw_geom = b_info.get("geometry") if b_info else None
+        geom = json.loads(raw_geom) if isinstance(raw_geom, str) else raw_geom
         has_val = obs is not None and obs.get("mean_value") is not None
 
         features.append({
@@ -392,7 +351,7 @@ def district_indicators_geojson(
                 "source": obs["source_name"] if has_val else layer_meta["source"],
                 "quality": obs["quality_status"] if has_val else "source_unreviewed",
                 "coverage_percentage": obs.get("coverage_percentage") if has_val else None,
-                "data_freshness": "RECENT" if has_val else "UNAVAILABLE",
+                "data_freshness": "HISTORICAL_EXTRACT" if has_val else "AWAITING_INGESTION",
                 "boundary_version": b_info.get("boundary_version") if b_info else None,
                 "centroid": {
                     "longitude": b_info["centroid_lon"],

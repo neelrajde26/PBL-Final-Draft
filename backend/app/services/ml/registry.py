@@ -60,7 +60,7 @@ class ModelRegistry:
                 metrics={"accuracy": 0.935, "f1_macro": 0.889, "roc_auc": 0.984, "brier_score": 0.052},
                 baseline_metrics={"accuracy": 0.858, "f1_macro": 0.731, "roc_auc": 0.500, "brier_score": 0.142},
                 feature_schema=["rainfall_lag_1", "rainfall_lag_2", "rainfall_rolling_mean_3", "spi_1", "spi_3", "sin_month", "cos_month"],
-                status="production",
+                status="retired_synthetic_training_data",
             ),
             RegisteredModel(
                 model_key="mdis-agricultural-lightgbm",
@@ -73,7 +73,7 @@ class ModelRegistry:
                 metrics={"accuracy": 0.966, "f1_macro": 0.964, "roc_auc": 0.994, "brier_score": 0.025},
                 baseline_metrics={"accuracy": 0.825, "f1_macro": 0.812, "roc_auc": 0.500, "brier_score": 0.175},
                 feature_schema=["ndvi", "ndvi_lag_1", "vci", "tci", "lst_lag_1", "sin_month", "cos_month", "rainfall_rolling_mean_3"],
-                status="production",
+                status="retired_synthetic_training_data",
             ),
             RegisteredModel(
                 model_key="mdis-hydrological-rf",
@@ -86,7 +86,7 @@ class ModelRegistry:
                 metrics={"accuracy": 0.740, "f1_macro": 0.479, "roc_auc": 0.805, "brier_score": 0.148},
                 baseline_metrics={"accuracy": 0.957, "f1_macro": 0.519, "roc_auc": 0.500, "brier_score": 0.043},
                 feature_schema=["soil_moisture_lag_1", "soil_moisture_lag_2", "rainfall_rolling_mean_3", "sin_month", "cos_month", "spi_3"],
-                status="production",
+                status="retired_synthetic_training_data",
             ),
         ]
         for m in defaults:

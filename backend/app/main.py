@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes import (
     admin,
+    analytics,
     alerts,
     auth,
     districts,
@@ -51,6 +52,7 @@ app.include_router(alerts.router, prefix=settings.api_prefix)
 app.include_router(admin.router, prefix=settings.api_prefix)
 app.include_router(historical.router, prefix=settings.api_prefix)
 app.include_router(gee.router, prefix=settings.api_prefix)
+app.include_router(analytics.router, prefix=settings.api_prefix)
 
 
 @app.get("/")

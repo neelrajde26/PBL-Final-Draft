@@ -5,6 +5,8 @@ from __future__ import annotations
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query
+
+from app.services import store
 from sqlalchemy import text
 
 from app.data.districts import get_district
@@ -54,49 +56,19 @@ def get_historical_series(
         pass
 
     if not items:
-        # Load from preprocessed dataset if available
-        import os
-        from pathlib import Path
-        import pandas as pd
-
-        csv_path = Path("backend/data/processed/maharashtra_drought_features_2000_2023.csv")
-        if not csv_path.is_file():
-            csv_path = Path(__file__).parents[3] / "backend" / "data" / "processed" / "maharashtra_drought_features_2000_2023.csv"
-
-        if csv_path.is_file():
-            try:
-                df = pd.read_csv(csv_path)
-                var_col = variable if variable in df.columns else ("rainfall" if "rainfall" in df.columns else "ndvi")
-                unit_map = {
-                    "rainfall": "mm/month",
-                    "ndvi": "unitless (-1 to 1)",
-                    "lst": "Kelvin",
-                    "soil_moisture": "m³/m³",
-                    "spi_1": "z-score",
-                    "spi_3": "z-score",
-                    "vci": "percentage (0-100)",
-                    "vhi": "percentage (0-100)",
-                }
-                filtered = df[
-                    (df["district_id"] == district.id) &
-                    (df["date"] >= f"{start_year}-01-01") &
-                    (df["date"] <= f"{end_year}-12-31")
-                ]
-                for _, r in filtered.iterrows():
-                    val = float(r[var_col])
-                    items.append({
-                        "observation_time": r["date"],
-                        "mean_value": round(val, 3),
-                        "median_value": round(val, 3),
-                        "minimum_value": round(val * 0.9, 3),
-                        "maximum_value": round(val * 1.1, 3),
-                        "valid_pixel_count": 1420,
-                        "coverage_percentage": 98.5,
-                        "unit": unit_map.get(var_col, "index"),
-                        "quality_status": "verified_historical",
-                    })
-            except Exception:
-                pass
+        spec = store.INDICATOR_SOURCES.get(variable)
+        df = store.frame("indices")
+        if spec and not df.empty and spec[1] in df:
+            col, unit = spec[1], spec[2]
+            sel = df[(df["district_id"] == district.id) & df["date"].dt.year.between(start_year, end_year)].dropna(subset=[col])
+            for r in sel.itertuples():
+                items.append({
+                    "observation_time": r.date.date().isoformat(),
+                    "mean_value": round(float(getattr(r, col)), 4),
+                    "median_value": None, "minimum_value": None, "maximum_value": None,
+                    "valid_pixel_count": None, "coverage_percentage": None,
+                    "unit": unit, "quality_status": "gee_extract",
+                })
 
     return {
         "district_id": district.id,
@@ -104,6 +76,7 @@ def get_historical_series(
         "variable": variable,
         "period": f"{start_year} - {end_year}",
         "count": len(items),
+        "status": "data_available" if items else "awaiting_ingestion",
         "series": items,
     }
 

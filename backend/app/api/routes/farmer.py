@@ -258,6 +258,8 @@ def predict_farmer_drought_risk(req: FarmerPredictionRequest) -> dict[str, objec
         )
 
     return {
+        "method": "rule_based_field_checklist",
+        "method_note": "Score from the farmer's own field answers using fixed weights; not a satellite model forecast. Advisories are general guidance; confirm with the local Krishi Vigyan Kendra.",
         "district_id": district.id,
         "district_name": district.name,
         "region": district.region,

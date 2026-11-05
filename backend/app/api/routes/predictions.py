@@ -9,7 +9,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import text
 
+import pandas as pd
+
 from app.data.districts import get_district
+from app.services import store
 from app.db import database
 from app.services.auth.dependencies import get_current_user, require_role
 from app.services.auth.security import User, UserRole
@@ -29,6 +32,7 @@ class RunPredictionRequest(BaseModel):
 def list_predictions(
     district_id: str | None = Query(None, description="Filter by district ID"),
     horizon: str = Query("30d", description="Forecast horizon: 30d, 3m, 6m"),
+    domain: str = Query("meteorological", description="meteorological or agricultural"),
 ) -> dict[str, object]:
     """Retrieve operational predictions and risk levels."""
     horizon_check = validate_horizon_availability(horizon, has_nwp_source=False)
@@ -65,50 +69,38 @@ def list_predictions(
     except Exception:
         pass
 
+    status = "stored" if items else "awaiting_pipeline"
     if not items:
-        from datetime import date, timedelta
-        from app.data.districts import DISTRICTS
-
-        start_dt = date.today()
-        days_ahead = 30 if horizon == "30d" else (90 if horizon == "3m" else 180)
-        end_dt = start_dt + timedelta(days=days_ahead)
-        model_key = "mdis-meteorological-xgboost" if horizon == "30d" else "mdis-hydrological-rf"
-
-        target_districts = [d for d in DISTRICTS if district_id is None or d.id == district_id]
-
-        for dist in target_districts:
-            region_prob_base = {
-                "Marathwada": 0.64,
-                "Vidarbha": 0.52,
-                "North Maharashtra": 0.38,
-                "Western Maharashtra": 0.28,
-                "Konkan": 0.11,
-            }.get(dist.region, 0.40)
-
-            if dist.is_priority:
-                region_prob_base += 0.08
-            prob = round(min(0.92, max(0.05, region_prob_base)), 3)
-
-            level = "high_risk" if prob >= 0.60 else ("moderate" if prob >= 0.40 else ("watch" if prob >= 0.20 else "normal"))
-
-            items.append({
-                "id": f"pred-{dist.id}-{horizon}",
-                "district_id": dist.id,
-                "district_name": dist.name,
-                "region": dist.region,
-                "model_key": model_key,
-                "forecast_horizon": horizon,
-                "target_start": start_dt.isoformat(),
-                "target_end": end_dt.isoformat(),
-                "risk_level": level,
-                "probability": prob,
-                "lower_interval": round(max(0.0, prob - 0.08), 3),
-                "upper_interval": round(min(1.0, prob + 0.08), 3),
-                "explanation": f"Walk-forward validated {model_key} projection based on SPI-3 anomaly and root-zone moisture trend.",
-                "source_quality": "Trained ML Ensemble (XGBoost/RF)",
-                "is_demo": False,
-                "created_at": start_dt.isoformat(),
-            })
+        # Forecasts produced by app/ml/pipeline.py from real Earth Engine extracts.
+        # The pipeline forecasts one month ahead, so it answers the 30d horizon only.
+        preds = store.frame("predictions")
+        if not preds.empty and horizon == "30d":
+            status = "pipeline_output"
+            report = store.model_report() or {}
+            preds = preds[preds["domain"] == domain]
+            if district_id:
+                preds = preds[preds["district_id"] == district_id]
+            info = report.get("models", {}).get(domain, {})
+            for r in preds.itertuples():
+                d = get_district(r.district_id)
+                items.append({
+                    "id": f"pred-{r.district_id}-{r.domain}-{r.target_date.date()}",
+                    "district_id": r.district_id,
+                    "district_name": d.name if d else r.district_id,
+                    "region": d.region if d else "",
+                    "model_key": info.get("model_key", f"mdis-{r.domain}"),
+                    "forecast_horizon": "30d",
+                    "target_start": r.target_date.date().isoformat(),
+                    "target_end": (r.target_date + pd.offsets.MonthEnd(0)).date().isoformat(),
+                    "risk_level": r.risk_level,
+                    "probability": float(r.probability),
+                    "lower_interval": None,
+                    "upper_interval": None,
+                    "explanation": f"P({info.get('target_definition', r.domain)}) from data through {r.input_data_date}.",
+                    "source_quality": info.get("acceptance", {}).get("status", "experimental"),
+                    "is_demo": False,
+                    "created_at": str(report.get("generated_at", "")),
+                })
 
     items.sort(key=lambda x: x["probability"], reverse=True)
 
@@ -116,6 +108,8 @@ def list_predictions(
         "count": len(items),
         "horizon": horizon,
         "horizon_status": horizon_check,
+        "status": status,
+        "message": None if items else "No forecasts yet: run the Earth Engine sync and the modelling pipeline.",
         "items": items,
     }
 

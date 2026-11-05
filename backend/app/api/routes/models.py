@@ -72,3 +72,14 @@ def get_feature_importance(
         ],
     }
 
+
+
+@router.get("/report")
+def get_pipeline_report() -> dict[str, object]:
+    """Saved evaluation of the models trained on real Earth Engine data (app/ml/pipeline.py)."""
+    from app.services import store
+
+    report = store.model_report()
+    if not report:
+        return {"status": "awaiting_pipeline", "message": "No model has been trained on real observations yet.", "models": {}}
+    return {"status": "available", **report}
