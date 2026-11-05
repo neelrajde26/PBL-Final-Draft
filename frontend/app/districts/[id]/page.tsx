@@ -101,7 +101,7 @@ export default async function DistrictDetailPage({ params }: Props) {
             alignItems: "center",
             gap: 6,
             color: "var(--aqua)",
-            fontSize: 13,
+            fontSize: 15,
             textDecoration: "none",
           }}
         >
@@ -126,7 +126,7 @@ export default async function DistrictDetailPage({ params }: Props) {
             <span
               style={{
                 fontFamily: "JetBrains Mono",
-                fontSize: 12,
+                fontSize: 14,
                 color: "var(--secondary)",
                 background: "var(--surface)",
                 padding: "2px 8px",
@@ -140,7 +140,7 @@ export default async function DistrictDetailPage({ params }: Props) {
               <span className="badge severe">Priority Drought Watch</span>
             )}
             {district.legacy_names && district.legacy_names.length > 0 && (
-              <span style={{ fontSize: 12, color: "var(--secondary)" }}>
+              <span style={{ fontSize: 14, color: "var(--secondary)" }}>
                 (Formerly: {district.legacy_names.join(", ")})
               </span>
             )}
@@ -191,14 +191,14 @@ export default async function DistrictDetailPage({ params }: Props) {
             border: "1px solid var(--border)",
           }}
         >
-          <span style={{ fontSize: 12, color: "var(--secondary)" }}>CHIRPS Stored Observations</span>
+          <span style={{ fontSize: 14, color: "var(--secondary)" }}>CHIRPS Stored Observations</span>
           <strong
             className="num"
             style={{ display: "block", fontSize: 24, marginTop: 4, color: "var(--text)" }}
           >
             {observations.length} records
           </strong>
-          <small style={{ color: "var(--subtle)", fontSize: 12 }}>
+          <small style={{ color: "var(--subtle)", fontSize: 14 }}>
             {observations.length > 0 ? "Stored validation interval" : "No stored rows for queried interval"}
           </small>
         </div>
@@ -211,7 +211,7 @@ export default async function DistrictDetailPage({ params }: Props) {
             border: "1px solid var(--border)",
           }}
         >
-          <span style={{ fontSize: 12, color: "var(--secondary)" }}>Rainfall Period Total</span>
+          <span style={{ fontSize: 14, color: "var(--secondary)" }}>Rainfall Period Total</span>
           <strong
             className="num"
             style={{
@@ -223,7 +223,7 @@ export default async function DistrictDetailPage({ params }: Props) {
           >
             {observations.length > 0 ? `${totalRainfall.toFixed(2)} mm` : "No Observation"}
           </strong>
-          <small style={{ color: "var(--subtle)", fontSize: 12 }}>
+          <small style={{ color: "var(--subtle)", fontSize: 14 }}>
             {observations.length > 0 ? "District spatial mean" : "Awaiting sync or live ingestion"}
           </small>
         </div>
@@ -236,7 +236,7 @@ export default async function DistrictDetailPage({ params }: Props) {
             border: "1px solid var(--border)",
           }}
         >
-          <span style={{ fontSize: 12, color: "var(--secondary)" }}>Active Warning Status</span>
+          <span style={{ fontSize: 14, color: "var(--secondary)" }}>Active Warning Status</span>
           <div style={{ marginTop: 6 }}>
             {activeAlerts.length > 0 ? (
               <span className={`badge ${activeAlerts[0].warning_level}`}>
@@ -246,7 +246,7 @@ export default async function DistrictDetailPage({ params }: Props) {
               <span className="badge normal">Normal / No Alert</span>
             )}
           </div>
-          <small style={{ color: "var(--subtle)", fontSize: 12, marginTop: 6, display: "block" }}>
+          <small style={{ color: "var(--subtle)", fontSize: 14, marginTop: 6, display: "block" }}>
             {activeAlerts.length} operational advisories
           </small>
         </div>
@@ -259,7 +259,7 @@ export default async function DistrictDetailPage({ params }: Props) {
             border: "1px solid var(--border)",
           }}
         >
-          <span style={{ fontSize: 12, color: "var(--secondary)" }}>Centroid Coordinates</span>
+          <span style={{ fontSize: 14, color: "var(--secondary)" }}>Centroid Coordinates</span>
           <strong
             className="num"
             style={{ display: "block", fontSize: 16, marginTop: 8, color: "var(--text)" }}
@@ -268,7 +268,7 @@ export default async function DistrictDetailPage({ params }: Props) {
               ? `${district.centroid.latitude.toFixed(3)}°N, ${district.centroid.longitude.toFixed(3)}°E`
               : "Unavailable"}
           </strong>
-          <small style={{ color: "var(--subtle)", fontSize: 12 }}>WGS84 EPSG:4326</small>
+          <small style={{ color: "var(--subtle)", fontSize: 14 }}>WGS84 EPSG:4326</small>
         </div>
       </section>
 
@@ -276,7 +276,7 @@ export default async function DistrictDetailPage({ params }: Props) {
       <section style={{ marginBottom: 36 }}>
         <div style={{ marginBottom: 14 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Drought Indices Profile</h2>
-          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 13 }}>
+          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 15 }}>
             Multi-sensor meteorological, agricultural, and hydrological indicators based on Indian Drought Manual standards.
           </p>
         </div>
@@ -303,14 +303,14 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {spi1?.category ?? "Historical Record"}
               </span>
             </div>
-            <p style={{ fontSize: 12, color: "var(--secondary)", margin: "8px 0" }}>
+            <p style={{ fontSize: 14, color: "var(--secondary)", margin: "8px 0" }}>
               1-month Standardized Precipitation Index fitted with Gamma distribution MLE.
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span className="num" style={{ fontSize: 22, color: spi1 ? "var(--text)" : "var(--subtle)" }}>
                 {spi1 ? spi1.value.toFixed(2) : "—"}
               </span>
-              <span style={{ fontSize: 11, color: "var(--subtle)" }}>CHIRPS Daily</span>
+              <span style={{ fontSize: 14, color: "var(--subtle)" }}>CHIRPS Daily</span>
             </div>
           </div>
 
@@ -329,14 +329,14 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {spi3?.category ?? "Normal"}
               </span>
             </div>
-            <p style={{ fontSize: 12, color: "var(--secondary)", margin: "8px 0" }}>
+            <p style={{ fontSize: 14, color: "var(--secondary)", margin: "8px 0" }}>
               3-month accumulation standard index capturing monsoon seasonal deficiency.
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span className="num" style={{ fontSize: 22, color: spi3 ? "var(--text)" : "var(--subtle)" }}>
                 {spi3 ? spi3.value.toFixed(2) : "—"}
               </span>
-              <span style={{ fontSize: 11, color: "var(--subtle)" }}>CHIRPS Daily</span>
+              <span style={{ fontSize: 14, color: "var(--subtle)" }}>CHIRPS Daily</span>
             </div>
           </div>
 
@@ -355,14 +355,14 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {vci?.category ?? "Moderate Vigour"}
               </span>
             </div>
-            <p style={{ fontSize: 12, color: "var(--secondary)", margin: "8px 0" }}>
+            <p style={{ fontSize: 14, color: "var(--secondary)", margin: "8px 0" }}>
               Normalized vegetation vigor relative to historical min-max extremes from MODIS NDVI.
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span className="num" style={{ fontSize: 22, color: vci ? "var(--pink)" : "var(--subtle)" }}>
                 {vci ? `${vci.value.toFixed(1)}%` : "—"}
               </span>
-              <span style={{ fontSize: 11, color: "var(--subtle)" }}>MODIS MOD13Q1</span>
+              <span style={{ fontSize: 14, color: "var(--subtle)" }}>MODIS MOD13Q1</span>
             </div>
           </div>
 
@@ -381,14 +381,14 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {vhi?.category ?? "Normal"}
               </span>
             </div>
-            <p style={{ fontSize: 12, color: "var(--secondary)", margin: "8px 0" }}>
+            <p style={{ fontSize: 14, color: "var(--secondary)", margin: "8px 0" }}>
               Combined moisture and thermal stress index: 0.5 × VCI + 0.5 × TCI.
             </p>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
               <span className="num" style={{ fontSize: 22, color: vhi ? "var(--pink)" : "var(--subtle)" }}>
                 {vhi ? vhi.value.toFixed(1) : "—"}
               </span>
-              <span style={{ fontSize: 11, color: "var(--subtle)" }}>MOD13Q1 + MOD11A2</span>
+              <span style={{ fontSize: 14, color: "var(--subtle)" }}>MOD13Q1 + MOD11A2</span>
             </div>
           </div>
         </div>
@@ -398,7 +398,7 @@ export default async function DistrictDetailPage({ params }: Props) {
       <section style={{ marginBottom: 36 }}>
         <div style={{ marginBottom: 14 }}>
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>Forecasting Horizon Outlook</h2>
-          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 13 }}>
+          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 15 }}>
             Trained machine-learning drought risk predictions across 30-day, 3-month, and 6-month horizons. Short-term horizons (7d, 15d) remain disabled with scientific disclosure.
           </p>
         </div>
@@ -417,7 +417,7 @@ export default async function DistrictDetailPage({ params }: Props) {
               gridTemplateColumns: "1fr 1fr 1.5fr 1fr",
               padding: "12px 20px",
               background: "var(--raised)",
-              fontSize: 12,
+              fontSize: 14,
               color: "var(--secondary)",
               fontWeight: 600,
             }}
@@ -440,7 +440,7 @@ export default async function DistrictDetailPage({ params }: Props) {
           >
             <div><strong>7-Day Outlook</strong></div>
             <div><span className="badge disabled">Disabled</span></div>
-            <span style={{ fontSize: 12, color: "var(--secondary)" }}>Requires operational NWP numerical weather prediction coupling</span>
+            <span style={{ fontSize: 14, color: "var(--secondary)" }}>Requires operational NWP numerical weather prediction coupling</span>
             <span style={{ color: "var(--subtle)" }}>—</span>
           </div>
 
@@ -456,7 +456,7 @@ export default async function DistrictDetailPage({ params }: Props) {
           >
             <div><strong>15-Day Outlook</strong></div>
             <div><span className="badge disabled">Disabled</span></div>
-            <span style={{ fontSize: 12, color: "var(--secondary)" }}>Requires medium-range ensemble numerical forecast feed</span>
+            <span style={{ fontSize: 14, color: "var(--secondary)" }}>Requires medium-range ensemble numerical forecast feed</span>
             <span style={{ color: "var(--subtle)" }}>—</span>
           </div>
 
@@ -475,7 +475,7 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {pred30?.risk_level ?? "Standard Risk"}
               </span>
             </div>
-            <span style={{ fontSize: 12, color: "var(--secondary)" }}>LightGBM sub-seasonal precipitation deficit & soil moisture anomaly</span>
+            <span style={{ fontSize: 14, color: "var(--secondary)" }}>LightGBM sub-seasonal precipitation deficit & soil moisture anomaly</span>
             <span className="num" style={{ fontWeight: 600, color: "var(--negative)" }}>
               {pred30 ? `${(pred30.probability * 100).toFixed(1)}%` : "34.2%"}
             </span>
@@ -496,7 +496,7 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {pred3m?.risk_level ?? "Watch"}
               </span>
             </div>
-            <span style={{ fontSize: 12, color: "var(--secondary)" }}>Seasonal SPI-3 below -1.0 threshold probability</span>
+            <span style={{ fontSize: 14, color: "var(--secondary)" }}>Seasonal SPI-3 below -1.0 threshold probability</span>
             <span className="num" style={{ fontWeight: 600, color: "var(--warning)" }}>
               {pred3m ? `${(pred3m.probability * 100).toFixed(1)}%` : "28.5%"}
             </span>
@@ -517,7 +517,7 @@ export default async function DistrictDetailPage({ params }: Props) {
                 {pred6m?.risk_level ?? "Normal"}
               </span>
             </div>
-            <span style={{ fontSize: 12, color: "var(--secondary)" }}>Long-term hydrological replenishment projection</span>
+            <span style={{ fontSize: 14, color: "var(--secondary)" }}>Long-term hydrological replenishment projection</span>
             <span className="num" style={{ fontWeight: 600, color: "var(--aqua)" }}>
               {pred6m ? `${(pred6m.probability * 100).toFixed(1)}%` : "22.1%"}
             </span>
@@ -548,7 +548,7 @@ export default async function DistrictDetailPage({ params }: Props) {
                   <span className={`badge ${alert.warning_level}`}>{alert.warning_level.replace("_", " ")}</span>
                 </div>
                 {alert.advisory && (
-                  <div style={{ marginTop: 12, fontSize: 13, lineHeight: 1.6, color: "var(--secondary)" }}>
+                  <div style={{ marginTop: 12, fontSize: 15, lineHeight: 1.6, color: "var(--secondary)" }}>
                     <p style={{ margin: "4px 0" }}><strong>English:</strong> {alert.advisory.en}</p>
                     <p style={{ margin: "4px 0", color: "var(--text)" }}><strong>मराठी:</strong> {alert.advisory.mr}</p>
                   </div>
@@ -558,7 +558,7 @@ export default async function DistrictDetailPage({ params }: Props) {
                     <span
                       key={driver}
                       style={{
-                        fontSize: 11,
+                        fontSize: 14,
                         background: "var(--ground)",
                         border: "1px solid var(--border)",
                         padding: "2px 8px",

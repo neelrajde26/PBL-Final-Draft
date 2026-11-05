@@ -457,7 +457,7 @@ export function FarmerClient({ districts, initialReports }: Props) {
 
             {/* Contributing factors */}
             <div className="pt-2 border-t border-[var(--border)]">
-              <span className="text-[11px] font-mono text-[var(--subtle)] block mb-1.5 uppercase">
+              <span className="text-[13px] font-mono text-[var(--subtle)] block mb-1.5 uppercase">
                 {language === "mr" ? "जोखीम ठरवणारे प्रमुख घटक:" : "Top Contributing Factors:"}
               </span>
               <div className="flex flex-wrap gap-2 text-xs">
@@ -601,7 +601,7 @@ export function FarmerClient({ districts, initialReports }: Props) {
                       {r.district_id.toUpperCase()} {r.taluka ? `· ${r.taluka}` : ""}
                     </span>
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono uppercase font-bold border ${
+                      className={`px-1.5 py-0.5 rounded text-[13px] font-mono uppercase font-bold border ${
                         r.status === "verified"
                           ? "bg-emerald-950 text-emerald-400 border-emerald-800"
                           : "bg-amber-950 text-amber-400 border-amber-800"
@@ -612,7 +612,7 @@ export function FarmerClient({ districts, initialReports }: Props) {
                   </div>
                   <p className="text-[var(--secondary)] line-clamp-2">{r.concern}</p>
                   {r.verification_notes && (
-                    <div className="text-[11px] text-[var(--subtle)] border-t border-[var(--border)] pt-1 mt-1">
+                    <div className="text-[13px] text-[var(--subtle)] border-t border-[var(--border)] pt-1 mt-1">
                       <span className="text-[var(--aqua)]">Verified: </span>
                       {r.verification_notes}
                     </div>

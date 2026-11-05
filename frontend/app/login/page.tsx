@@ -77,14 +77,14 @@ export default function LoginPage() {
             <Lock size={20} />
           </div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>Sign in to MDIS</h1>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--secondary)" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 15, color: "var(--secondary)" }}>
             Maharashtra Drought Intelligence System
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Email Address
             </label>
             <div style={{ position: "relative" }}>
@@ -106,8 +106,8 @@ export default function LoginPage() {
 
           <div>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-              <label style={{ fontSize: 12, color: "var(--secondary)" }}>Password</label>
-              <Link href="/forgot-password" style={{ fontSize: 12, color: "var(--aqua)", textDecoration: "none" }}>
+              <label style={{ fontSize: 14, color: "var(--secondary)" }}>Password</label>
+              <Link href="/forgot-password" style={{ fontSize: 14, color: "var(--aqua)", textDecoration: "none" }}>
                 Forgot password?
               </Link>
             </div>
@@ -133,7 +133,7 @@ export default function LoginPage() {
               style={{
                 padding: "10px 14px",
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: 14,
                 background: "rgba(239, 68, 68, 0.15)",
                 color: "#EF4444",
                 border: "1px solid rgba(239, 68, 68, 0.3)",
@@ -163,7 +163,7 @@ export default function LoginPage() {
             paddingTop: 20,
             borderTop: "1px solid var(--border)",
             textAlign: "center",
-            fontSize: 13,
+            fontSize: 15,
             color: "var(--secondary)",
           }}
         >

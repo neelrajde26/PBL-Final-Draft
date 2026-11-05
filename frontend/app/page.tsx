@@ -1,5 +1,5 @@
-import { ExecutiveDashboard } from "@/components/executive-dashboard";
+import { Landing } from "@/components/landing/landing";
 
 export default function Home() {
-  return <ExecutiveDashboard />;
+  return <Landing />;
 }

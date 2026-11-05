@@ -94,7 +94,7 @@ export function HistoricalClient({ districts }: Props) {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Primary District
             </label>
             <select
@@ -111,7 +111,7 @@ export function HistoricalClient({ districts }: Props) {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Comparison District
             </label>
             <select
@@ -128,7 +128,7 @@ export function HistoricalClient({ districts }: Props) {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Variable
             </label>
             <select
@@ -144,7 +144,7 @@ export function HistoricalClient({ districts }: Props) {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Climatological Year
             </label>
             <select
@@ -178,7 +178,7 @@ export function HistoricalClient({ districts }: Props) {
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>
             Historical Maharashtra Drought Events (Run-Theory Analysis)
           </h2>
-          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 13 }}>
+          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 15 }}>
             Identified by Yevjevich (1967) run-sum theory: onset begins when index falls below -1.0;
             termination occurs upon recovery to non-negative index value (&ge; 0.0).
           </p>
@@ -212,12 +212,12 @@ export function HistoricalClient({ districts }: Props) {
                       {ev.severity_category}
                     </span>
                   </div>
-                  <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 12 }}>
+                  <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 14 }}>
                     Region: {ev.region} · Event ID: <code>{ev.event_id}</code>
                   </p>
                 </div>
 
-                <div style={{ textAlign: "right", fontSize: 12, color: "var(--secondary)" }}>
+                <div style={{ textAlign: "right", fontSize: 14, color: "var(--secondary)" }}>
                   <div>Duration: <strong className="num" style={{ color: "var(--text)" }}>{ev.duration_months} months</strong></div>
                   <div>Onset: {ev.onset_date} → Terminated: {ev.termination_date}</div>
                 </div>
@@ -233,7 +233,7 @@ export function HistoricalClient({ districts }: Props) {
                   background: "var(--ground)",
                   border: "1px solid var(--border)",
                   borderRadius: 4,
-                  fontSize: 12,
+                  fontSize: 14,
                 }}
               >
                 <div>
@@ -248,7 +248,7 @@ export function HistoricalClient({ districts }: Props) {
                 </div>
               </div>
 
-              <p style={{ margin: 0, fontSize: 13, color: "var(--secondary)", lineHeight: 1.6 }}>
+              <p style={{ margin: 0, fontSize: 15, color: "var(--secondary)", lineHeight: 1.6 }}>
                 <strong>Agronomic & Social Impact:</strong> {ev.impact}
               </p>
             </article>

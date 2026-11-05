@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Iterator
@@ -37,6 +38,14 @@ class Database:
         self.settings = settings
         self._engine: Engine | None = None
         self._session_factory: sessionmaker[Session] | None = None
+        # When a connection attempt fails, skip further attempts for a short window so that
+        # every request does not pay the connect timeout while the database is down.
+        self._unavailable_until = 0.0
+
+    RETRY_AFTER_SECONDS = 30.0
+
+    class Unavailable(RuntimeError):
+        pass
 
     @property
     def configured(self) -> bool:
@@ -66,8 +75,15 @@ class Database:
 
     @contextmanager
     def session(self) -> Iterator[Session]:
+        if time.monotonic() < self._unavailable_until:
+            raise Database.Unavailable("Database marked unavailable; retrying later.")
         session = self.session_factory()()
         try:
+            try:
+                session.connection()
+            except Exception:
+                self._unavailable_until = time.monotonic() + self.RETRY_AFTER_SECONDS
+                raise
             yield session
             session.commit()
         except Exception:
@@ -79,10 +95,13 @@ class Database:
     def health(self) -> DatabaseHealth:
         if not self.configured:
             return DatabaseHealth(False, False, "DATABASE_URL is not configured.")
+        if time.monotonic() < self._unavailable_until:
+            return DatabaseHealth(True, False, "Database connection failed recently; retrying shortly.")
         try:
             with self.engine().connect() as connection:
                 connection.execute(text("SELECT 1"))
         except Exception:
+            self._unavailable_until = time.monotonic() + self.RETRY_AFTER_SECONDS
             return DatabaseHealth(
                 True,
                 False,

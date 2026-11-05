@@ -100,14 +100,14 @@ export default function RegisterPage() {
             <Sprout size={20} />
           </div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>Farmer Registration</h1>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--secondary)" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 15, color: "var(--secondary)" }}>
             Register to receive localized advisories and submit ground-truth field observations.
           </p>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: "grid", gap: 14 }}>
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
               Full Name (पूर्ण नाव)
             </label>
             <input
@@ -121,7 +121,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
               Email Address (ईमेल)
             </label>
             <input
@@ -135,7 +135,7 @@ export default function RegisterPage() {
           </div>
 
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
               Password (पासवर्ड - किमान ८ अक्षरे)
             </label>
             <input
@@ -151,7 +151,7 @@ export default function RegisterPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1.2fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
                 District (जिल्हा)
               </label>
               <select
@@ -168,7 +168,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
                 Preferred Language
               </label>
               <select
@@ -185,7 +185,7 @@ export default function RegisterPage() {
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
                 Taluka (तालुका)
               </label>
               <input
@@ -198,7 +198,7 @@ export default function RegisterPage() {
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 4 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 4 }}>
                 Village (गाव)
               </label>
               <input
@@ -216,7 +216,7 @@ export default function RegisterPage() {
               style={{
                 padding: "10px 14px",
                 borderRadius: 4,
-                fontSize: 12,
+                fontSize: 14,
                 background: "rgba(239, 68, 68, 0.15)",
                 color: "#EF4444",
                 border: "1px solid rgba(239, 68, 68, 0.3)",
@@ -246,7 +246,7 @@ export default function RegisterPage() {
             paddingTop: 16,
             borderTop: "1px solid var(--border)",
             textAlign: "center",
-            fontSize: 13,
+            fontSize: 15,
             color: "var(--secondary)",
           }}
         >

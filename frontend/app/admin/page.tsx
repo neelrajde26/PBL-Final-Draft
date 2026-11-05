@@ -20,7 +20,7 @@ export default async function AdminPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>System Administration & Ingestion Telemetry</h1>

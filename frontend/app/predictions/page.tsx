@@ -21,7 +21,7 @@ export default async function PredictionsPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Drought Forecasting & Predictive Intelligence</h1>
@@ -51,7 +51,7 @@ export default async function PredictionsPage() {
           <strong style={{ fontSize: 14, color: "var(--text)" }}>
             Short-Range Forecast Horizons (7-Day & 15-Day) Status: Disabled
           </strong>
-          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 13, lineHeight: 1.5 }}>
+          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 15, lineHeight: 1.5 }}>
             In strict compliance with scientific validation standards, 7-day and 15-day weather forecasts are offline
             because numerical weather prediction (NWP) model feeds (such as NCMRWF or IMD GFS) are not currently linked.
             Only sub-seasonal (30d) and seasonal (3m, 6m) climatological models are active.

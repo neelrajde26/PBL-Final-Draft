@@ -22,7 +22,7 @@ export default function ResearcherPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Researcher Hub & Geospatial Analytics</h1>
@@ -39,7 +39,7 @@ export default function ResearcherPage() {
           <h2 style={{ fontSize: 18, fontWeight: 600, margin: 0 }}>
             Inter-Sensor Pearson Correlation Matrix (Statewide 2015–2024)
           </h2>
-          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 13 }}>
+          <p style={{ margin: "4px 0 0", color: "var(--secondary)", fontSize: 15 }}>
             Captures coupling between atmospheric precipitation, canopy greenness, surface thermal dynamics, and root-zone water storage.
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function ResearcherPage() {
               padding: "12px 20px",
               background: "var(--raised)",
               color: "var(--secondary)",
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 600,
               textAlign: "center",
             }}
@@ -81,7 +81,7 @@ export default function ResearcherPage() {
                 padding: "14px 20px",
                 borderTop: "1px solid var(--border)",
                 alignItems: "center",
-                fontSize: 13,
+                fontSize: 15,
                 textAlign: "center",
               }}
             >
@@ -153,7 +153,7 @@ export default function ResearcherPage() {
             borderRadius: "var(--radius-card)",
             padding: 20,
             fontFamily: "JetBrains Mono",
-            fontSize: 12,
+            fontSize: 14,
             lineHeight: 1.6,
             color: "var(--aqua)",
             overflowX: "auto",
@@ -195,7 +195,7 @@ def extract_district_zonal_mean(image, district_polygon, scale_meters, crs="EPSG
             <h3 style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
               Maharashtra District MultiPolygons
             </h3>
-            <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--secondary)" }}>
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--secondary)" }}>
               Official 36-district boundary collection in GeoJSON format (EPSG:4326).
             </p>
             <a
@@ -220,7 +220,7 @@ def extract_district_zonal_mean(image, district_polygon, scale_meters, crs="EPSG
             <h3 style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
               CHIRPS Beed Validation Series
             </h3>
-            <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--secondary)" }}>
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--secondary)" }}>
               Verified historical precipitation observations (01–03 June 2024).
             </p>
             <a
@@ -245,7 +245,7 @@ def extract_district_zonal_mean(image, district_polygon, scale_meters, crs="EPSG
             <h3 style={{ margin: "0 0 6px", fontSize: 15, color: "var(--text)" }}>
               18-Layer Geospatial Catalog
             </h3>
-            <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--secondary)" }}>
+            <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--secondary)" }}>
               Complete sensor specification, band mappings, units, and scaling metadata.
             </p>
             <a

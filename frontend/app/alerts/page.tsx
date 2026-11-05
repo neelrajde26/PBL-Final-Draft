@@ -23,7 +23,7 @@ export default async function AlertsPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Early Warning Alerts & Agricultural Advisories</h1>

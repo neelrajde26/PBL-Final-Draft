@@ -26,6 +26,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
+import { StateMark } from "@/components/landing/state-mark";
 import { getDistricts, getReadiness, type District, type Readiness } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
@@ -38,7 +39,7 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { href: "/", labelKey: "nav.overview", icon: Activity, group: "operational" },
+  { href: "/overview", labelKey: "nav.overview", icon: Activity, group: "operational" },
   { href: "/map", labelKey: "nav.gisMap", icon: Map, group: "operational" },
   { href: "/districts", labelKey: "nav.districts", icon: MapPin, group: "operational" },
 
@@ -97,6 +98,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
     }
   };
 
+  if (pathname === "/") return <>{children}</>;
+
   const groups: { key: NavItem["group"]; labelEn: string; labelMr: string }[] = [
     { key: "operational", labelEn: "OPERATIONAL", labelMr: "कार्यप्रणाली" },
     { key: "analysis", labelEn: "SCIENTIFIC ANALYSIS", labelMr: "वैज्ञानिक विश्लेषण" },
@@ -119,14 +122,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </button>
 
           <Link href="/" className="flex items-center gap-2.5 text-decoration-none">
-            <span className="w-8 h-8 rounded bg-[var(--surface)] border border-[var(--aqua)] text-[var(--aqua)] flex items-center justify-center font-mono font-bold text-xs tracking-wider">
-              MH
-            </span>
+            <StateMark className="w-9 h-8 text-[var(--aqua)]" />
             <div className="hidden sm:block">
-              <span className="font-semibold text-sm tracking-tight text-[var(--text)] block leading-none">
-                MDIS
+              <span className="display font-bold text-lg tracking-tight text-[var(--text)] block leading-none">
+                DroughtLens
               </span>
-              <span className="text-[11px] text-[var(--subtle)] font-normal leading-tight block">
+              <span className="text-[13px] text-[var(--subtle)] font-normal leading-tight block">
                 {language === "mr" ? "महाराष्ट्र दुष्काळ गुप्तचर प्रणाली" : "Maharashtra Drought Intelligence"}
               </span>
             </div>
@@ -182,15 +183,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
           {/* Infrastructure Health Badge */}
           <div
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded text-[11px] font-mono border border-[var(--border)] bg-[var(--surface)]"
+            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-mono border border-[var(--border)] bg-[var(--surface)]"
             title={`API: ${readiness?.status ?? "active"} | GEE: ${readiness?.gee?.available ? "connected" : "configured"} | DB: ${readiness?.database?.available ? "connected" : "offline"}`}
           >
             <span
               className={`w-2 h-2 rounded-full ${
-                readiness?.status === "ready" ? "bg-[var(--aqua)] animate-pulse" : "bg-emerald-400"
+                readiness?.gee?.available ? "bg-[var(--aqua)] animate-pulse" : readiness ? "bg-[var(--warning)]" : "bg-[var(--negative)]"
               }`}
             />
-            <span className="text-[var(--secondary)] font-sans">{t("app.live")}</span>
+            <span className="text-[var(--secondary)] font-sans">
+              {readiness?.gee?.available ? "GEE live" : readiness ? "GEE offline" : "API offline"}
+            </span>
           </div>
 
           {/* Account Profile Link */}
@@ -220,7 +223,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               if (items.length === 0) return null;
               return (
                 <div key={group.key} className="space-y-1">
-                  <div className="px-2 text-[10px] font-mono font-semibold text-[var(--subtle)] tracking-wider">
+                  <div className="px-2 text-[13px] font-mono font-semibold text-[var(--subtle)] tracking-wider">
                     {language === "mr" ? group.labelMr : group.labelEn}
                   </div>
                   {items.map(({ href, labelKey, icon: Icon, badge }) => {
@@ -230,7 +233,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                         key={href}
                         href={href}
                         onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center justify-between px-2.5 py-2 rounded text-xs transition-colors ${
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-md text-[15px] transition-colors ${
                           isActive
                             ? "bg-[var(--raised)] text-[var(--aqua)] font-semibold border-l-2 border-[var(--aqua)]"
                             : "text-[var(--secondary)] hover:text-[var(--text)] hover:bg-[var(--surface)]"
@@ -241,7 +244,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                           <span>{t(labelKey)}</span>
                         </div>
                         {badge && (
-                          <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                          <span className="px-1.5 py-0.5 rounded text-[13px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
                             {badge}
                           </span>
                         )}
@@ -254,12 +257,14 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </nav>
 
           {/* Sidebar Footer Metadata */}
-          <div className="p-3 border-t border-[var(--border)] text-[11px] text-[var(--subtle)] font-mono space-y-1">
+          <div className="p-3 border-t border-[var(--border)] text-[13px] text-[var(--subtle)] font-mono space-y-1">
             <div className="flex justify-between items-center">
-              <span>PROJ: gee-pbl</span>
-              <span className="text-[var(--aqua)]">v1.0.0</span>
+              <span>GEE: {readiness?.gee?.project_id ?? "—"}</span>
+              <span className={readiness?.database?.available ? "text-[var(--aqua)]" : "text-[var(--warning)]"}>
+                DB {readiness?.database?.available ? "on" : "off"}
+              </span>
             </div>
-            <div>36 Districts Active</div>
+            <div>{districts.filter((d) => d.boundary_available).length} districts with boundaries</div>
           </div>
         </aside>
 

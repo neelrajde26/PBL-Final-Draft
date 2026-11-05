@@ -63,7 +63,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
           {/* Horizon Picker */}
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 8, fontWeight: 500 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 8, fontWeight: 500 }}>
               Forecast Horizon
             </label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -75,7 +75,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
                   onClick={() => setSelectedHorizon(h.id)}
                   style={{
                     padding: "6px 12px",
-                    fontSize: 12,
+                    fontSize: 14,
                     borderRadius: 4,
                     cursor: h.disabled ? "not-allowed" : "pointer",
                     background: selectedHorizon === h.id ? "var(--aqua)" : "var(--ground)",
@@ -95,7 +95,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
 
           {/* Target Domain Picker */}
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 8, fontWeight: 500 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 8, fontWeight: 500 }}>
               Drought Domain Target
             </label>
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
@@ -106,7 +106,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
                   onClick={() => setSelectedDomain(d.id)}
                   style={{
                     padding: "6px 12px",
-                    fontSize: 12,
+                    fontSize: 14,
                     borderRadius: 4,
                     cursor: "pointer",
                     background: selectedDomain === d.id ? "var(--raised)" : "var(--ground)",
@@ -125,7 +125,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
 
         {registeredModels.length > 0 && (
           <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid var(--border)" }}>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Inference Model Artifact
             </label>
             <select
@@ -156,11 +156,11 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 20 }}>
             <div>
-              <span style={{ fontSize: 12, color: "var(--secondary)" }}>Operational Prediction Outlook</span>
+              <span style={{ fontSize: 14, color: "var(--secondary)" }}>Operational Prediction Outlook</span>
               <h2 style={{ fontSize: 24, margin: "4px 0 0", color: "var(--text)" }}>
                 {selectedDistrict?.name ?? "District"} · {selectedHorizon.toUpperCase()} Horizon
               </h2>
-              <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--secondary)" }}>
+              <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--secondary)" }}>
                 Target: {DOMAINS.find((d) => d.id === selectedDomain)?.target}
               </p>
             </div>
@@ -178,7 +178,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontSize: 13, color: "var(--secondary)" }}>Predicted Drought Probability</span>
+              <span style={{ fontSize: 15, color: "var(--secondary)" }}>Predicted Drought Probability</span>
               <strong className="num" style={{ fontSize: 32, color: "var(--negative)" }}>
                 68.4%
               </strong>
@@ -194,7 +194,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
             >
               <div style={{ width: "68.4%", height: "100%", background: "var(--negative)", borderRadius: 4 }} />
             </div>
-            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "var(--subtle)" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, color: "var(--subtle)" }}>
               <span>90% Confidence Interval: [59.2%, 76.8%]</span>
               <span>Classification Threshold: 50.0%</span>
             </div>
@@ -202,7 +202,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
 
           {/* District Selector Dropdown */}
           <div>
-            <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+            <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
               Select District to Inspect
             </label>
             <select
@@ -232,14 +232,14 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
             <Sparkles size={18} style={{ color: "var(--aqua)" }} />
             <h3 style={{ margin: 0, fontSize: 16 }}>SHAP Feature Explanations</h3>
           </div>
-          <p style={{ margin: "0 0 16px", fontSize: 12, color: "var(--secondary)" }}>
+          <p style={{ margin: "0 0 16px", fontSize: 14, color: "var(--secondary)" }}>
             Normalized TreeSHAP local contribution to the 68.4% predicted risk probability.
           </p>
 
           <div style={{ display: "grid", gap: 12 }}>
             {SHAP_FEATURES.map((feat) => (
               <div key={feat.feature}>
-                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 12, marginBottom: 4 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14, marginBottom: 4 }}>
                   <span style={{ color: "var(--text)" }}>{feat.label}</span>
                   <span
                     className="num"
@@ -284,11 +284,11 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
           <div>
             <h3 style={{ margin: 0, fontSize: 17 }}>Statewide 30-Day Risk Ranking</h3>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--secondary)" }}>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--secondary)" }}>
               High-risk districts requiring administrative and agricultural water contingency preparation.
             </p>
           </div>
-          <Link href="/alerts" className="ui-button" style={{ fontSize: 12 }}>
+          <Link href="/alerts" className="ui-button" style={{ fontSize: 14 }}>
             View Operational Advisories →
           </Link>
         </div>
@@ -308,7 +308,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
               padding: "12px 20px",
               background: "var(--raised)",
               color: "var(--secondary)",
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: 600,
             }}
           >
@@ -331,7 +331,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
                   padding: "14px 20px",
                   borderTop: "1px solid var(--border)",
                   alignItems: "center",
-                  fontSize: 13,
+                  fontSize: 15,
                 }}
               >
                 <div>
@@ -351,7 +351,7 @@ export function PredictionsClient({ districts, registeredModels }: Props) {
                   <Link
                     href={`/districts/${d.id}`}
                     className="ui-button"
-                    style={{ padding: "4px 8px", fontSize: 12 }}
+                    style={{ padding: "4px 8px", fontSize: 14 }}
                   >
                     Inspect
                   </Link>

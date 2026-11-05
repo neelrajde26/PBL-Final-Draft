@@ -21,7 +21,7 @@ export default function SettingsPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>User Preferences & Alert Settings</h1>
@@ -48,7 +48,7 @@ export default function SettingsPage() {
 
           <div style={{ display: "grid", gap: 14 }}>
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
                 Primary Advisory Language
               </label>
               <select
@@ -63,7 +63,7 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
                 Default Administrative District
               </label>
               <select
@@ -97,7 +97,7 @@ export default function SettingsPage() {
           </div>
 
           <div style={{ display: "grid", gap: 12 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 15 }}>
               <input
                 type="checkbox"
                 checked={emailAlerts}
@@ -107,7 +107,7 @@ export default function SettingsPage() {
               <span>Receive automated weekly drought status digest</span>
             </label>
 
-            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 13 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 15 }}>
               <input
                 type="checkbox"
                 checked={severeOnly}
@@ -124,7 +124,7 @@ export default function SettingsPage() {
             style={{
               padding: "10px 14px",
               borderRadius: 4,
-              fontSize: 12,
+              fontSize: 14,
               background: "rgba(16, 185, 129, 0.15)",
               color: "#10B981",
               border: "1px solid rgba(16, 185, 129, 0.3)",

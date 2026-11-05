@@ -29,3 +29,10 @@ audit-artifacts/
 # Locally acquired boundary geometry may have source-specific redistribution terms.
 backend/data/boundaries/local/
 .taste-skill/
+
+# local dev
+.venv/
+.next-dev.log
+.uvicorn.log
+.taste-skill/
+backend/.env

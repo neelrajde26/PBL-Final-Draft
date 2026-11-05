@@ -166,7 +166,7 @@ export default function DataSourcesPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Earth Observation Satellite Catalog</h1>
@@ -207,7 +207,7 @@ export default function DataSourcesPage() {
                   <span
                     style={{
                       fontFamily: "JetBrains Mono",
-                      fontSize: 11,
+                      fontSize: 14,
                       background: "var(--ground)",
                       border: "1px solid var(--border)",
                       padding: "2px 6px",
@@ -218,12 +218,12 @@ export default function DataSourcesPage() {
                     {ds.mission}
                   </span>
                 </div>
-                <p style={{ margin: "4px 0 0", fontFamily: "JetBrains Mono", fontSize: 12, color: "var(--secondary)" }}>
+                <p style={{ margin: "4px 0 0", fontFamily: "JetBrains Mono", fontSize: 14, color: "var(--secondary)" }}>
                   GEE Collection: <strong>{ds.collection_id}</strong>
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: 16, fontSize: 12 }}>
+              <div style={{ display: "flex", gap: 16, fontSize: 14 }}>
                 <div>
                   <span style={{ color: "var(--secondary)" }}>Resolution:</span>
                   <div style={{ fontWeight: 600, color: "var(--text)", marginTop: 2 }}>{ds.native_spatial}</div>
@@ -251,7 +251,7 @@ export default function DataSourcesPage() {
                   gridTemplateColumns: "1.2fr 1fr 1fr 2fr",
                   padding: "8px 14px",
                   background: "var(--raised)",
-                  fontSize: 11,
+                  fontSize: 14,
                   fontWeight: 600,
                   color: "var(--secondary)",
                 }}
@@ -269,7 +269,7 @@ export default function DataSourcesPage() {
                     gridTemplateColumns: "1.2fr 1fr 1fr 2fr",
                     padding: "10px 14px",
                     borderTop: "1px solid var(--border)",
-                    fontSize: 12,
+                    fontSize: 14,
                     alignItems: "center",
                   }}
                 >
@@ -281,7 +281,7 @@ export default function DataSourcesPage() {
               ))}
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 12, marginTop: 12 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, fontSize: 14, marginTop: 12 }}>
               <div>
                 <strong style={{ color: "var(--secondary)" }}>QA & Pixel Masking Protocol:</strong>
                 <p style={{ margin: "4px 0 0", color: "var(--text)" }}>{ds.qa_mask}</p>

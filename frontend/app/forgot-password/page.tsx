@@ -73,7 +73,7 @@ export default function ForgotPasswordPage() {
             <KeyRound size={20} />
           </div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 600 }}>Reset Password</h1>
-          <p style={{ margin: "6px 0 0", fontSize: 13, color: "var(--secondary)" }}>
+          <p style={{ margin: "6px 0 0", fontSize: 15, color: "var(--secondary)" }}>
             Enter your registered email to receive secure recovery instructions.
           </p>
         </div>
@@ -92,7 +92,7 @@ export default function ForgotPasswordPage() {
             <strong style={{ display: "block", color: "var(--text)", fontSize: 15 }}>
               Instructions Dispatched
             </strong>
-            <p style={{ margin: "6px 0 16px", fontSize: 12, color: "var(--secondary)", lineHeight: 1.5 }}>
+            <p style={{ margin: "6px 0 16px", fontSize: 14, color: "var(--secondary)", lineHeight: 1.5 }}>
               If an account is associated with <strong>{email}</strong>, a recovery token has been generated.
             </p>
             <Link href="/login" className="ui-button primary" style={{ width: "100%", justifyContent: "center" }}>
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
         ) : (
           <form onSubmit={handleSubmit} style={{ display: "grid", gap: 16 }}>
             <div>
-              <label style={{ display: "block", fontSize: 12, color: "var(--secondary)", marginBottom: 6 }}>
+              <label style={{ display: "block", fontSize: 14, color: "var(--secondary)", marginBottom: 6 }}>
                 Registered Email Address
               </label>
               <div style={{ position: "relative" }}>
@@ -127,7 +127,7 @@ export default function ForgotPasswordPage() {
                 style={{
                   padding: "10px 14px",
                   borderRadius: 4,
-                  fontSize: 12,
+                  fontSize: 14,
                   background: "rgba(239, 68, 68, 0.15)",
                   color: "#EF4444",
                   border: "1px solid rgba(239, 68, 68, 0.3)",
@@ -158,7 +158,7 @@ export default function ForgotPasswordPage() {
                   alignItems: "center",
                   gap: 6,
                   color: "var(--secondary)",
-                  fontSize: 13,
+                  fontSize: 15,
                   textDecoration: "none",
                 }}
               >

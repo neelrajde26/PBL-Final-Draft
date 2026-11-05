@@ -65,7 +65,7 @@ export function DistrictListClient({ initialDistricts }: { initialDistricts: Dis
               onClick={() => setRegion(r)}
               style={{
                 padding: "6px 12px",
-                fontSize: 12,
+                fontSize: 14,
                 borderRadius: 4,
                 cursor: "pointer",
                 background: region === r ? "var(--aqua)" : "var(--surface)",
@@ -97,7 +97,7 @@ export function DistrictListClient({ initialDistricts }: { initialDistricts: Dis
             padding: "12px 20px",
             background: "var(--raised)",
             color: "var(--secondary)",
-            fontSize: 12,
+            fontSize: 14,
             fontWeight: 600,
           }}
         >
@@ -122,7 +122,7 @@ export function DistrictListClient({ initialDistricts }: { initialDistricts: Dis
                 padding: "14px 20px",
                 borderTop: "1px solid var(--border)",
                 alignItems: "center",
-                fontSize: 13,
+                fontSize: 15,
               }}
             >
               <div>
@@ -148,11 +148,11 @@ export function DistrictListClient({ initialDistricts }: { initialDistricts: Dis
 
               <span>
                 {district.boundary_available ? (
-                  <span style={{ color: "var(--aqua)", fontSize: 12 }}>
+                  <span style={{ color: "var(--aqua)", fontSize: 14 }}>
                     ✓ {district.boundary_version}
                   </span>
                 ) : (
-                  <span style={{ color: "var(--subtle)", fontSize: 12 }}>Unavailable</span>
+                  <span style={{ color: "var(--subtle)", fontSize: 14 }}>Unavailable</span>
                 )}
               </span>
 
@@ -168,7 +168,7 @@ export function DistrictListClient({ initialDistricts }: { initialDistricts: Dis
                 <Link
                   href={`/districts/${district.id}`}
                   className="ui-button"
-                  style={{ padding: "4px 8px", fontSize: 12 }}
+                  style={{ padding: "4px 8px", fontSize: 14 }}
                   title={`View ${district.name} details`}
                 >
                   Profile <ArrowRight size={12} />

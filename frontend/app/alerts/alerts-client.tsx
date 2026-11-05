@@ -55,7 +55,7 @@ export function AlertsClient({ initialAlerts }: Props) {
         {/* Language Toggle */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           <Globe2 size={16} style={{ color: "var(--aqua)" }} />
-          <span style={{ fontSize: 13, color: "var(--secondary)", fontWeight: 500 }}>Advisory Language:</span>
+          <span style={{ fontSize: 15, color: "var(--secondary)", fontWeight: 500 }}>Advisory Language:</span>
           <div style={{ display: "flex", gap: 6 }}>
             {LANGUAGES.map((l) => (
               <button
@@ -64,7 +64,7 @@ export function AlertsClient({ initialAlerts }: Props) {
                 onClick={() => setLang(l.code)}
                 style={{
                   padding: "6px 12px",
-                  fontSize: 12,
+                  fontSize: 14,
                   borderRadius: 4,
                   cursor: "pointer",
                   background: lang === l.code ? "var(--aqua)" : "var(--ground)",
@@ -89,7 +89,7 @@ export function AlertsClient({ initialAlerts }: Props) {
               onClick={() => setSelectedSeverity(s.code)}
               style={{
                 padding: "6px 10px",
-                fontSize: 12,
+                fontSize: 14,
                 borderRadius: 4,
                 cursor: "pointer",
                 background: selectedSeverity === s.code ? "var(--raised)" : "transparent",
@@ -170,13 +170,13 @@ export function AlertsClient({ initialAlerts }: Props) {
                         {alert.warning_level.replace("_", " ")}
                       </span>
                     </div>
-                    <p style={{ margin: "4px 0 0", fontSize: 13, color: "var(--secondary)" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 15, color: "var(--secondary)" }}>
                       Trigger: <strong>{alert.trigger_reason}</strong>
                     </p>
                   </div>
 
                   <div style={{ textAlign: "right" }}>
-                    <span style={{ fontSize: 11, color: "var(--subtle)" }}>
+                    <span style={{ fontSize: 14, color: "var(--subtle)" }}>
                       Forecast Horizon: <strong>{alert.prediction_horizon}</strong>
                     </span>
                     <small style={{ display: "block", color: "var(--subtle)", marginTop: 2 }}>
@@ -198,7 +198,7 @@ export function AlertsClient({ initialAlerts }: Props) {
                   <span
                     style={{
                       display: "block",
-                      fontSize: 11,
+                      fontSize: 14,
                       textTransform: "uppercase",
                       color: "var(--aqua)",
                       fontWeight: 600,
@@ -222,12 +222,12 @@ export function AlertsClient({ initialAlerts }: Props) {
 
                 {/* Environmental Drivers Tags */}
                 <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                  <span style={{ fontSize: 12, color: "var(--secondary)" }}>Environmental Drivers:</span>
+                  <span style={{ fontSize: 14, color: "var(--secondary)" }}>Environmental Drivers:</span>
                   {alert.environmental_drivers.map((d) => (
                     <span
                       key={d}
                       style={{
-                        fontSize: 11,
+                        fontSize: 14,
                         background: "var(--raised)",
                         border: "1px solid var(--border)",
                         padding: "2px 8px",

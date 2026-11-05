@@ -74,7 +74,7 @@ export default async function IndicesPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Drought Indices & Scientific Formulations</h1>
@@ -107,8 +107,8 @@ export default async function IndicesPage() {
             }}
           >
             <strong style={{ display: "block", color: "#10B981", fontSize: 14 }}>Near Normal / Wet</strong>
-            <span className="num" style={{ fontSize: 13, color: "var(--secondary)" }}>Index &ge; -0.99</span>
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--subtle)" }}>
+            <span className="num" style={{ fontSize: 15, color: "var(--secondary)" }}>Index &ge; -0.99</span>
+            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--subtle)" }}>
               Soil moisture and rainfall meet seasonal crop requirements.
             </p>
           </div>
@@ -123,8 +123,8 @@ export default async function IndicesPage() {
             }}
           >
             <strong style={{ display: "block", color: "#FBBF24", fontSize: 14 }}>Moderate Drought</strong>
-            <span className="num" style={{ fontSize: 13, color: "var(--secondary)" }}>-1.00 to -1.49</span>
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--subtle)" }}>
+            <span className="num" style={{ fontSize: 15, color: "var(--secondary)" }}>-1.00 to -1.49</span>
+            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--subtle)" }}>
               Agricultural moisture stress; protective irrigation advised.
             </p>
           </div>
@@ -139,8 +139,8 @@ export default async function IndicesPage() {
             }}
           >
             <strong style={{ display: "block", color: "#F97316", fontSize: 14 }}>Severe Drought</strong>
-            <span className="num" style={{ fontSize: 13, color: "var(--secondary)" }}>-1.50 to -1.99</span>
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--subtle)" }}>
+            <span className="num" style={{ fontSize: 15, color: "var(--secondary)" }}>-1.50 to -1.99</span>
+            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--subtle)" }}>
               Substantial crop wilting and depleted root-zone moisture.
             </p>
           </div>
@@ -155,8 +155,8 @@ export default async function IndicesPage() {
             }}
           >
             <strong style={{ display: "block", color: "#EF4444", fontSize: 14 }}>Extreme Drought</strong>
-            <span className="num" style={{ fontSize: 13, color: "var(--secondary)" }}>Index &le; -2.00</span>
-            <p style={{ margin: "6px 0 0", fontSize: 12, color: "var(--subtle)" }}>
+            <span className="num" style={{ fontSize: 15, color: "var(--secondary)" }}>Index &le; -2.00</span>
+            <p style={{ margin: "6px 0 0", fontSize: 14, color: "var(--subtle)" }}>
               Widespread failure of rainfed crops, fodder crisis, and surface water exhaustion.
             </p>
           </div>
@@ -192,7 +192,7 @@ export default async function IndicesPage() {
                     <span
                       style={{
                         fontFamily: "JetBrains Mono",
-                        fontSize: 11,
+                        fontSize: 14,
                         background: "var(--raised)",
                         padding: "2px 6px",
                         borderRadius: 3,
@@ -202,7 +202,7 @@ export default async function IndicesPage() {
                       {idx.key}
                     </span>
                   </div>
-                  <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--secondary)" }}>
+                  <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--secondary)" }}>
                     Domain: <strong>{idx.domain}</strong> · Source: <code>{idx.source}</code> · Cadence: {idx.cadence}
                   </p>
                 </div>
@@ -216,14 +216,14 @@ export default async function IndicesPage() {
                   border: "1px solid var(--border)",
                   borderRadius: 4,
                   fontFamily: "JetBrains Mono",
-                  fontSize: 12,
+                  fontSize: 14,
                   color: "var(--pink)",
                 }}
               >
                 {idx.formula}
               </div>
 
-              <p style={{ margin: 0, fontSize: 13, lineHeight: 1.6, color: "var(--secondary)" }}>
+              <p style={{ margin: 0, fontSize: 15, lineHeight: 1.6, color: "var(--secondary)" }}>
                 {idx.description}
               </p>
             </article>
@@ -234,7 +234,7 @@ export default async function IndicesPage() {
       {/* District Quick Inspector */}
       <section>
         <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 12 }}>Inspect District Indices</h2>
-        <p style={{ color: "var(--secondary)", fontSize: 13, marginBottom: 16 }}>
+        <p style={{ color: "var(--secondary)", fontSize: 15, marginBottom: 16 }}>
           Select any of the 36 districts to view its individual time series, calculated SPI, VCI, and risk outlook.
         </p>
         <div
@@ -257,7 +257,7 @@ export default async function IndicesPage() {
                 border: "1px solid var(--border)",
                 borderRadius: 4,
                 textDecoration: "none",
-                fontSize: 12,
+                fontSize: 14,
                 color: "var(--text)",
               }}
             >

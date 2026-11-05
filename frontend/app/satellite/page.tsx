@@ -10,7 +10,7 @@ export default async function SatellitePage() {
   const [health, collections] = await Promise.all([getGeeHealth(), getGeeCollections()]);
   return (
     <main className="route-main">
-      <header className="route-header"><div><Link href="/">MDIS</Link><h1>Satellite sources</h1><p>Backend-only Earth Engine configuration and native dataset cadence.</p></div><span className={health.available ? "source-state available" : "source-state"}>{health.status}</span></header>
+      <header className="route-header"><div><Link href="/overview">MDIS</Link><h1>Satellite sources</h1><p>Backend-only Earth Engine configuration and native dataset cadence.</p></div><span className={health.available ? "source-state available" : "source-state"}>{health.status}</span></header>
       <section className="source-summary"><div><span>Project</span><strong>{health.project_id ?? "Not configured"}</strong></div><div><span>Authentication</span><strong>{health.auth_method ?? "Unavailable"}</strong></div><div><span>Registered collections</span><strong className="num">{collections.count}</strong></div></section>
       <div className="source-list">
         {collections.items.map((collection) => (

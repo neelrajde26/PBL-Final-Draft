@@ -298,7 +298,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 PostgreSQL / PostGIS
               </span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
+                className={`px-1.5 py-0.5 rounded text-[13px] font-mono font-bold uppercase border ${
                   readiness?.database.available
                     ? "bg-emerald-950 text-emerald-400 border-emerald-800"
                     : "bg-amber-950 text-amber-400 border-amber-800"
@@ -321,7 +321,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 <Activity size={15} className="text-[var(--aqua)]" />
                 Redis Message Broker
               </span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border bg-emerald-950 text-emerald-400 border-emerald-800">
+              <span className="px-1.5 py-0.5 rounded text-[13px] font-mono font-bold uppercase border bg-emerald-950 text-emerald-400 border-emerald-800">
                 Active
               </span>
             </div>
@@ -337,7 +337,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 <Server size={15} className="text-[var(--aqua)]" />
                 Celery Task Workers
               </span>
-              <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border bg-emerald-950 text-emerald-400 border-emerald-800">
+              <span className="px-1.5 py-0.5 rounded text-[13px] font-mono font-bold uppercase border bg-emerald-950 text-emerald-400 border-emerald-800">
                 Standby / Ready
               </span>
             </div>
@@ -354,7 +354,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 Google Earth Engine
               </span>
               <span
-                className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
+                className={`px-1.5 py-0.5 rounded text-[13px] font-mono font-bold uppercase border ${
                   geeHealth?.available
                     ? "bg-emerald-950 text-emerald-400 border-emerald-800"
                     : "bg-yellow-950 text-yellow-400 border-yellow-800"
@@ -384,7 +384,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
             </div>
             <p>{geeTestResult.message}</p>
             {geeTestResult.remediation && (
-              <div className="mt-2 pt-2 border-t border-amber-800/60 font-mono text-[11px] text-[var(--text)]">
+              <div className="mt-2 pt-2 border-t border-amber-800/60 font-mono text-[13px] text-[var(--text)]">
                 <strong>Actionable Remediation: </strong>
                 <span>{geeTestResult.remediation}</span>
               </div>
@@ -527,7 +527,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 <td className="p-3 font-mono text-[var(--aqua)]">86.5%</td>
                 <td className="p-3 font-mono text-[var(--aqua)]">0.892</td>
                 <td className="p-3">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  <span className="px-1.5 py-0.5 rounded text-[13px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
                     Production
                   </span>
                 </td>
@@ -540,7 +540,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 <td className="p-3 font-mono text-[var(--aqua)]">84.1%</td>
                 <td className="p-3 font-mono text-[var(--aqua)]">0.875</td>
                 <td className="p-3">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  <span className="px-1.5 py-0.5 rounded text-[13px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
                     Production
                   </span>
                 </td>
@@ -553,7 +553,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                 <td className="p-3 font-mono text-[var(--aqua)]">81.2%</td>
                 <td className="p-3 font-mono text-[var(--aqua)]">0.844</td>
                 <td className="p-3">
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                  <span className="px-1.5 py-0.5 rounded text-[13px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
                     Production
                   </span>
                 </td>
@@ -595,14 +595,14 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                   <td className="p-3 font-medium text-[var(--text)]">{u.full_name}</td>
                   <td className="p-3 font-mono text-[var(--secondary)]">{u.email}</td>
                   <td className="p-3">
-                    <span className="px-2 py-0.5 rounded text-[10px] font-mono uppercase bg-[var(--ground)] border border-[var(--border)] text-[var(--secondary)] font-semibold">
+                    <span className="px-2 py-0.5 rounded text-[13px] font-mono uppercase bg-[var(--ground)] border border-[var(--border)] text-[var(--secondary)] font-semibold">
                       {u.role}
                     </span>
                   </td>
                   <td className="p-3 uppercase text-[var(--subtle)]">{u.district_id || "All"}</td>
                   <td className="p-3">
                     <span
-                      className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
+                      className={`px-1.5 py-0.5 rounded text-[13px] font-mono font-bold uppercase border ${
                         u.is_active
                           ? "bg-emerald-950 text-emerald-400 border-emerald-800"
                           : "bg-red-950 text-red-400 border-red-800"
@@ -615,7 +615,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                     <button
                       type="button"
                       onClick={() => handleToggleUser(u.id)}
-                      className="px-2.5 py-1 rounded bg-[var(--ground)] border border-[var(--border)] hover:bg-[var(--raised)] text-[11px] font-medium text-[var(--secondary)] hover:text-[var(--text)] transition-colors"
+                      className="px-2.5 py-1 rounded bg-[var(--ground)] border border-[var(--border)] hover:bg-[var(--raised)] text-[13px] font-medium text-[var(--secondary)] hover:text-[var(--text)] transition-colors"
                     >
                       {u.is_active ? "Deactivate" : "Activate"}
                     </button>
@@ -647,7 +647,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                   District: {r.district_id.toUpperCase()} {r.taluka ? `· Taluka: ${r.taluka}` : ""}
                 </span>
                 <span
-                  className={`px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase border ${
+                  className={`px-2 py-0.5 rounded text-[13px] font-mono font-bold uppercase border ${
                     r.status === "verified"
                       ? "bg-emerald-950 text-emerald-400 border-emerald-800"
                       : "bg-amber-950 text-amber-400 border-amber-800"
@@ -658,7 +658,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
               </div>
               <p className="text-[var(--secondary)]">{r.concern}</p>
               {r.verification_notes && (
-                <div className="text-[11px] text-[var(--subtle)] bg-[var(--surface)] p-2 rounded border border-[var(--border)]">
+                <div className="text-[13px] text-[var(--subtle)] bg-[var(--surface)] p-2 rounded border border-[var(--border)]">
                   <strong className="text-[var(--aqua)]">Review Notes: </strong>
                   <span>{r.verification_notes}</span>
                 </div>
@@ -674,19 +674,19 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
                       setVerifyingReportId(r.id);
                       setVerificationNotes(e.target.value);
                     }}
-                    className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded px-2.5 py-1 text-[11px] text-[var(--text)] focus:outline-none"
+                    className="flex-1 bg-[var(--surface)] border border-[var(--border)] rounded px-2.5 py-1 text-[13px] text-[var(--text)] focus:outline-none"
                   />
                   <button
                     type="button"
                     onClick={() => handleVerifyReport(r.id, "verified")}
-                    className="px-3 py-1 bg-[var(--aqua)] text-[var(--ground)] font-semibold rounded text-[11px] hover:bg-[#45caa0]"
+                    className="px-3 py-1 bg-[var(--aqua)] text-[var(--ground)] font-semibold rounded text-[13px] hover:bg-[#45caa0]"
                   >
                     Verify
                   </button>
                   <button
                     type="button"
                     onClick={() => handleVerifyReport(r.id, "rejected")}
-                    className="px-3 py-1 bg-red-950 border border-red-800 text-red-300 font-semibold rounded text-[11px] hover:bg-red-900"
+                    className="px-3 py-1 bg-red-950 border border-red-800 text-red-300 font-semibold rounded text-[13px] hover:bg-red-900"
                   >
                     Reject
                   </button>

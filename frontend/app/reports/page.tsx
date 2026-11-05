@@ -23,7 +23,7 @@ export default async function ReportsPage() {
     <main className="route-main">
       <header className="route-header">
         <div>
-          <Link href="/" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 13 }}>
+          <Link href="/overview" style={{ color: "var(--aqua)", textDecoration: "none", fontSize: 15 }}>
             ← Home
           </Link>
           <h1 style={{ marginTop: 12 }}>Ground-Truth Field Observations Feed</h1>
@@ -81,13 +81,13 @@ export default async function ReportsPage() {
                       </h2>
                       <span className="badge normal">{r.status}</span>
                     </div>
-                    <p style={{ margin: "4px 0 0", fontSize: 12, color: "var(--secondary)" }}>
+                    <p style={{ margin: "4px 0 0", fontSize: 14, color: "var(--secondary)" }}>
                       Location: {r.taluka ? `${r.taluka} Taluka, ` : ""}
                       {r.village ? `${r.village} Village` : "District rural area"} · Division: {district?.region ?? "Maharashtra"}
                     </p>
                   </div>
 
-                  <span style={{ fontSize: 12, color: "var(--subtle)" }}>
+                  <span style={{ fontSize: 14, color: "var(--subtle)" }}>
                     Reported: {new Date(r.observation_date).toLocaleDateString("en-IN")}
                   </span>
                 </div>
@@ -101,7 +101,7 @@ export default async function ReportsPage() {
                     background: "var(--ground)",
                     border: "1px solid var(--border)",
                     borderRadius: 4,
-                    fontSize: 12,
+                    fontSize: 14,
                     margin: "12px 0",
                   }}
                 >
@@ -115,7 +115,7 @@ export default async function ReportsPage() {
                   </div>
                 </div>
 
-                <p style={{ margin: 0, fontSize: 13, color: "var(--secondary)", lineHeight: 1.6 }}>
+                <p style={{ margin: 0, fontSize: 15, color: "var(--secondary)", lineHeight: 1.6 }}>
                   {r.description}
                 </p>
               </article>
