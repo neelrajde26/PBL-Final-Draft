@@ -36,3 +36,4 @@ backend/data/boundaries/local/
 .uvicorn.log
 .taste-skill/
 backend/.env
+frontend/public/maplibre-gl-worker.mjs

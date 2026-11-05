@@ -23,7 +23,11 @@
     "methodology": "वैज्ञानिक पद्धती",
     "login": "लॉगिन",
     "logout": "बाहेर पडा",
-    "account": "खाते"
+    "account": "खाते",
+    "backtesting": "ऐतिहासिक चाचणी",
+    "coverage": "डेटा उपलब्धता",
+    "dataSources": "डेटा स्रोत",
+    "home": "मुख्यपृष्ठ"
   },
   "severity": {
     "normal": "सामान्य परिस्थिती",
@@ -123,4 +127,3 @@
     "viewDetails": "तपशील पहा"
   }
 }
-

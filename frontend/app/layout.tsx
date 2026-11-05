@@ -1,6 +1,7 @@
 import "@fontsource/jetbrains-mono/400.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./globals.css";
+import "./app.css";
 
 import type { Metadata } from "next";
 import { Figtree, League_Spartan } from "next/font/google";

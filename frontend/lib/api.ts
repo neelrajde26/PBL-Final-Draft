@@ -313,7 +313,7 @@ export function getGeeCollections(signal?: AbortSignal): Promise<GeeCollectionRe
 }
 
 export function getReadiness(signal?: AbortSignal): Promise<Readiness> {
-  return apiGet("/ready", readinessSchema, signal, 5_000);
+  return apiGet("/ready", readinessSchema, signal, 25_000);
 }
 
 export function getMapLayers(signal?: AbortSignal): Promise<{ count: number; items: MapLayer[] }> {
@@ -556,3 +556,41 @@ export function getDroughtIndices(
     signal,
   ).catch(() => ({ count: 0, items: [] }));
 }
+
+/* ---- Real-data pipeline endpoints (coverage, backtests, jobs, report) ---- */
+const looseObject = z.record(z.string(), z.unknown());
+
+export type Scores = { n: number; events: number; accuracy: number | null; precision: number | null; recall: number | null; f1: number | null; brier: number; tp: number; fp: number; fn: number; tn: number };
+export type BacktestSummary = {
+  status: string; domain: string; message?: string; label?: string; horizon?: string; model_algorithm?: string; model_version?: string; period?: string;
+  overall?: Scores; by_year?: ({ year: number } & Scores)[]; by_season?: ({ season: string } & Scores)[];
+  by_district?: ({ district_id: string; district_name: string; region: string } & Scores)[];
+  statewide_monthly?: { target_date: string; predicted_share: number; actual_share: number; mean_probability: number }[];
+};
+export type BacktestPoint = { issue_date: string; target_date: string; probability: number; predicted: number; actual: number; actual_value: number | null; outcome: string; trained_through: string };
+export type CoverageItem = {
+  district_id: string; district_name: string; region: string; boundary_available: boolean; monthly_months: number;
+  first_observation: string | null; latest_observation: string | null; latest_daily: string | null;
+  variables: Record<string, { latest: string; months: number; missing_pct: number }>; model_eligible: boolean; prediction_available: boolean; last_processed: string | null;
+};
+export type Coverage = { count: number; summary: { with_boundary: number; with_observations: number; model_eligible: number; with_prediction: number }; items: CoverageItem[] };
+export type GeeJob = { id: string; mode: string; started_at: string; finished_at?: string; status: string; project?: string; error?: string; duration_s?: number; [k: string]: unknown };
+export type GeeJobs = { count: number; last_success: string | null; items: GeeJob[] };
+export type ModelReport = { status: string; message?: string; generated_at?: string; period?: string; districts?: number; models: Record<string, Record<string, unknown>> };
+export type SeriesPoint = { observation_time: string; mean_value: number; unit: string };
+export type Series = { district_id: string; district_name: string; variable: string; status?: string; count: number; series: SeriesPoint[] };
+
+const asIs = <T,>() => looseObject as unknown as z.ZodType<T>;
+
+export const getCoverage = (signal?: AbortSignal) => apiGet("/coverage", asIs<Coverage>(), signal, 20_000);
+export const getGeeJobs = (signal?: AbortSignal) => apiGet("/gee/jobs", asIs<GeeJobs>(), signal);
+export const getModelReport = (signal?: AbortSignal) => apiGet("/models/report", asIs<ModelReport>(), signal);
+export const getBacktestSummary = (domain: string, signal?: AbortSignal) =>
+  apiGet(`/backtests/summary?domain=${encodeURIComponent(domain)}`, asIs<BacktestSummary>(), signal, 20_000);
+export const getBacktestSeries = (districtId: string, domain: string, signal?: AbortSignal) =>
+  apiGet(`/backtests/series?district_id=${encodeURIComponent(districtId)}&domain=${encodeURIComponent(domain)}`, asIs<{ status: string; items: BacktestPoint[] }>(), signal);
+export const getBacktestMap = (domain: string, targetDate?: string, signal?: AbortSignal) =>
+  apiGet(`/backtests/map?domain=${encodeURIComponent(domain)}${targetDate ? `&target_date=${targetDate}` : ""}`,
+    asIs<{ status: string; target_date?: string; dates: string[]; items: { district_id: string; probability: number; predicted: number; actual: number; error: number }[] }>(), signal);
+export const getSeries = (districtId: string, variable: string, startYear = 2001, endYear = new Date().getFullYear(), signal?: AbortSignal) =>
+  apiGet(`/historical/series?district_id=${encodeURIComponent(districtId)}&variable=${variable}&start_year=${startYear}&end_year=${endYear}`, asIs<Series>(), signal, 20_000);

@@ -1,7 +1,9 @@
 "use client";
 
 import type { FeatureCollection, MultiPolygon } from "geojson";
-import { Map, NavigationControl, type ErrorEvent, type MapLayerMouseEvent } from "maplibre-gl";
+import { Map, setWorkerUrl, NavigationControl, type ErrorEvent, type MapLayerMouseEvent } from "maplibre-gl";
+
+setWorkerUrl("/maplibre-gl-worker.mjs");
 import { useEffect, useRef, useState } from "react";
 
 import type { DistrictBoundaryCollection } from "@/lib/api";

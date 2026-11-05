@@ -206,9 +206,35 @@ MAP_LAYERS: dict[str, dict[str, Any]] = {
 }
 
 
+# Align the catalogue with what app/ml/indices.py actually computes from Earth Engine extracts.
+# Layers without a verified calculation stay listed but are flagged non-operational.
+_LAYER_FIXES: dict[str, dict[str, Any]] = {
+    "rainfall": {"unit": "mm/month", "max": 400, "source": "CHIRPS daily (UCSB-CHG/CHIRPS/DAILY), monthly sum",
+                 "palette": ["#3b2a1c", "#7a5a2e", "#2f7f86", "#3fb8d8", "#9ff0ff"]},
+    "rainfall_anomaly": {"name": "Rainfall vs normal", "unit": "% of normal", "min": -100, "max": 100, "source": "CHIRPS vs training-period climatology"},
+    "spi_1": {"source": "SPI-1: gamma fit on monthly CHIRPS totals"},
+    "spi_3": {"source": "SPI-3: gamma fit on 3-month CHIRPS totals"},
+    "spi_6": {"source": "SPI-6: gamma fit on 6-month CHIRPS totals"},
+    "ndvi": {"max": 0.8, "source": "MODIS MOD13Q1 v6.1, QA-filtered monthly mean"},
+    "vci": {"source": "VCI from MODIS NDVI, training-period min/max"},
+    "tci": {"source": "TCI from MODIS MOD11A2 LST, training-period min/max"},
+    "vhi": {"unit": "0-100", "max": 100, "source": "VHI = 0.5 VCI + 0.5 TCI"},
+    "soil_moisture": {"unit": "m3/m3", "min": 0.05, "max": 0.45, "source": "ERA5-Land volumetric soil water, layer 1"},
+    "predicted_risk": {"name": "Predicted drought risk (next month)", "source": "ML forecast, one month ahead", "palette": ["#1d4757", "#f4bbd0", "#ffb547", "#ff4f7b", "#a3123f"]},
+    "lst": {"unit": "°C", "min": 20, "max": 45, "source": "MODIS MOD11A2 v6.1 daytime LST", "palette": ["#3fb8d8", "#b8e0c8", "#ffd166", "#ff7a59", "#c81d4e"]},
+    "evapotranspiration": {"unit": "mm/month", "min": 0, "max": 200, "source": "MODIS MOD16A2 v6.1, monthly sum"},
+}
+_OPERATIONAL = {"rainfall", "rainfall_anomaly", "spi_1", "spi_3", "spi_6", "ndvi", "vci", "tci", "vhi", "soil_moisture", "lst", "evapotranspiration", "predicted_risk"}
+for _k, _spec in MAP_LAYERS.items():
+    _spec.update(_LAYER_FIXES.get(_k, {}))
+    _spec["operational"] = _k in _OPERATIONAL
+    _spec["mode"] = "predicted" if _k == "predicted_risk" else "observed"
+
+
 @router.get("/layers")
-def list_map_layers() -> dict[str, object]:
-    return {"count": len(MAP_LAYERS), "items": list(MAP_LAYERS.values())}
+def list_map_layers(include_unverified: bool = Query(False)) -> dict[str, object]:
+    items = [m for m in MAP_LAYERS.values() if include_unverified or m["operational"]]
+    return {"count": len(items), "items": items}
 
 
 @router.get("/legend")

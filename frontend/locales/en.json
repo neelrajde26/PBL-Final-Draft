@@ -23,7 +23,11 @@
     "methodology": "Methodology",
     "login": "Login",
     "logout": "Logout",
-    "account": "Account"
+    "account": "Account",
+    "backtesting": "Backtesting",
+    "coverage": "Data Coverage",
+    "dataSources": "Data Sources",
+    "home": "Home"
   },
   "severity": {
     "normal": "Normal",
@@ -123,4 +127,3 @@
     "viewDetails": "View Details"
   }
 }
-

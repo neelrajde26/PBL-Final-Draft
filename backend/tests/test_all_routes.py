@@ -51,7 +51,9 @@ def test_auth_workflow() -> None:
 def test_maps_and_layers_endpoints() -> None:
     layers = client.get("/api/maps/layers")
     assert layers.status_code == 200
-    assert layers.json()["count"] == 18
+    items = layers.json()["items"]
+    assert items and all(i["operational"] for i in items)
+    assert client.get("/api/maps/layers?include_unverified=true").json()["count"] == 18
 
     legend = client.get("/api/maps/legend?layer=spi_3")
     assert legend.status_code == 200

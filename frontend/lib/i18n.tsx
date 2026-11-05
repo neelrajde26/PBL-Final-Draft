@@ -15,7 +15,7 @@ interface I18nContextType {
 const dictionaries: Record<Language, Record<string, unknown>> = { en, mr };
 
 const I18nContext = createContext<I18nContextType>({
-  language: "mr",
+  language: "en",
   setLanguage: () => {},
   t: (path: string, fallback?: string) => fallback || path,
 });
@@ -30,7 +30,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         // Ignore storage errors
       }
     }
-    return "mr";
+    return "en";
   });
 
   const setLanguage = (lang: Language) => {

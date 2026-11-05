@@ -8,6 +8,7 @@ rather than substituting anything.
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
@@ -15,7 +16,8 @@ from typing import Any
 import pandas as pd
 
 DATA = Path(__file__).resolve().parents[2] / "data"
-GEE = DATA / "gee"
+# MDIS_GEE_DIR lets tests and previews point the API at another extract folder.
+GEE = Path(os.environ["MDIS_GEE_DIR"]) if os.environ.get("MDIS_GEE_DIR") else DATA / "gee"
 DERIVED = GEE / "derived"
 BOUNDARIES = DATA / "boundaries" / "maharashtra_36_districts.geojson"
 
@@ -84,6 +86,14 @@ def boundaries() -> dict[str, dict[str, Any]]:
 
 def latest_values(indicator: str) -> tuple[dict[str, dict[str, Any]], str | None]:
     """Latest non-null value per district for an indicator, plus its source label."""
+    if indicator == "predicted_risk":
+        preds = frame("predictions")
+        if preds.empty:
+            return {}, "Forecast model (app/ml/pipeline.py)"
+        preds = preds[preds["domain"] == "meteorological"]
+        src = "ML forecast: P(SPI-3 <= -1) next month"
+        return {r.district_id: {"value": float(r.probability), "date": r.target_date, "unit": "probability", "source": src}
+                for r in preds.itertuples()}, src
     spec = INDICATOR_SOURCES.get(indicator)
     if not spec:
         return {}, None

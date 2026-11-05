@@ -1,7 +1,7 @@
-import { ExecutiveDashboard } from "@/components/executive-dashboard";
+import { Overview } from "@/components/overview/overview";
 
 export const metadata = { title: "Overview" };
 
 export default function OverviewPage() {
-  return <ExecutiveDashboard />;
+  return <Overview />;
 }

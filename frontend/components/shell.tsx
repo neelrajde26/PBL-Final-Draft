@@ -6,11 +6,9 @@ import {
   BarChart3,
   BookOpen,
   Cpu,
-  Globe,
+  Database,
+  FlaskConical,
   History,
-  Languages,
-  Layers,
-  LogOut,
   Map,
   MapPin,
   Menu,
@@ -22,266 +20,223 @@ import {
   User as UserIcon,
   X,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
 
 import { StateMark } from "@/components/landing/state-mark";
-import { getDistricts, getReadiness, type District, type Readiness } from "@/lib/api";
+import { getDistricts, getGeeJobs, getReadiness, type District, type Readiness } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
 type NavItem = {
   href: string;
   labelKey: string;
   icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
-  group: "operational" | "analysis" | "portals" | "resources";
-  badge?: string;
+  group: "monitor" | "forecast" | "portals" | "about";
 };
 
 const navItems: NavItem[] = [
-  { href: "/overview", labelKey: "nav.overview", icon: Activity, group: "operational" },
-  { href: "/map", labelKey: "nav.gisMap", icon: Map, group: "operational" },
-  { href: "/districts", labelKey: "nav.districts", icon: MapPin, group: "operational" },
+  { href: "/overview", labelKey: "nav.overview", icon: Activity, group: "monitor" },
+  { href: "/map", labelKey: "nav.gisMap", icon: Map, group: "monitor" },
+  { href: "/districts", labelKey: "nav.districts", icon: MapPin, group: "monitor" },
+  { href: "/indices", labelKey: "nav.indices", icon: Sliders, group: "monitor" },
+  { href: "/alerts", labelKey: "nav.alerts", icon: AlertTriangle, group: "monitor" },
 
-  { href: "/indices", labelKey: "nav.indices", icon: Sliders, group: "analysis" },
-  { href: "/predictions", labelKey: "nav.forecasting", icon: TrendingUp, group: "analysis" },
-  { href: "/models", labelKey: "nav.models", icon: Cpu, group: "analysis" },
-  { href: "/historical", labelKey: "nav.historical", icon: History, group: "analysis" },
-  { href: "/alerts", labelKey: "nav.alerts", icon: AlertTriangle, group: "analysis" },
+  { href: "/predictions", labelKey: "nav.forecasting", icon: TrendingUp, group: "forecast" },
+  { href: "/backtesting", labelKey: "nav.backtesting", icon: FlaskConical, group: "forecast" },
+  { href: "/models", labelKey: "nav.models", icon: Cpu, group: "forecast" },
+  { href: "/historical", labelKey: "nav.historical", icon: History, group: "forecast" },
 
-  { href: "/farmer", labelKey: "nav.farmerPortal", icon: Sprout, group: "portals", badge: "Live" },
+  { href: "/farmer", labelKey: "nav.farmerPortal", icon: Sprout, group: "portals" },
   { href: "/researcher", labelKey: "nav.researcherHub", icon: BarChart3, group: "portals" },
   { href: "/admin", labelKey: "nav.adminConsole", icon: ShieldCheck, group: "portals" },
 
-  { href: "/satellite", labelKey: "nav.satellites", icon: Satellite, group: "resources" },
-  { href: "/methodology", labelKey: "nav.methodology", icon: BookOpen, group: "resources" },
+  { href: "/coverage", labelKey: "nav.coverage", icon: Database, group: "about" },
+  { href: "/data-sources", labelKey: "nav.dataSources", icon: Satellite, group: "about" },
+  { href: "/methodology", labelKey: "nav.methodology", icon: BookOpen, group: "about" },
 ];
 
-export function Shell({ children }: { children: React.ReactNode }) {
+const GROUPS: { key: NavItem["group"]; en: string; mr: string }[] = [
+  { key: "monitor", en: "Monitor", mr: "निरीक्षण" },
+  { key: "forecast", en: "Forecast & evaluate", mr: "अंदाज व मूल्यमापन" },
+  { key: "portals", en: "Portals", mr: "पोर्टल्स" },
+  { key: "about", en: "Data & method", mr: "डेटा व पद्धत" },
+];
+
+const DISTRICT_KEY = "mdis_district";
+
+function timeAgo(iso: string | null | undefined) {
+  if (!iso) return null;
+  const mins = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (mins < 60) return `${mins} min ago`;
+  if (mins < 60 * 48) return `${Math.round(mins / 60)} h ago`;
+  return `${Math.round(mins / 1440)} days ago`;
+}
+
+function ShellInner({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const params = useSearchParams();
   const { language, setLanguage, t } = useI18n();
 
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [readiness, setReadiness] = useState<Readiness | null>(null);
+  const [apiDown, setApiDown] = useState(false);
+  const [lastSync, setLastSync] = useState<string | null>(null);
   const [districts, setDistricts] = useState<District[]>([]);
-  const [selectedDistrict, setSelectedDistrict] = useState<string>("beed");
+  const [district, setDistrict] = useState("beed");
 
   useEffect(() => {
-    let active = true;
-    getReadiness()
-      .then((data) => {
-        if (active) setReadiness(data);
-      })
-      .catch(() => {
-        if (active) setReadiness(null);
-      });
+    const fromUrl = params.get("district");
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(DISTRICT_KEY);
+    } catch {}
+    setDistrict(fromUrl || saved || "beed");
+  }, [params]);
 
-    getDistricts()
-      .then((res) => {
-        if (active) setDistricts(res.items);
-      })
-      .catch(() => {});
-
-    return () => {
-      active = false;
-    };
+  useEffect(() => {
+    const ctrl = new AbortController();
+    const fail = () => !ctrl.signal.aborted && setApiDown(true);
+    getReadiness(ctrl.signal).then(setReadiness).catch(() => {});
+    getDistricts(ctrl.signal).then((r) => setDistricts(r.items)).catch(fail);
+    getGeeJobs(ctrl.signal).then((j) => setLastSync(j.last_success)).catch(() => {});
+    return () => ctrl.abort();
   }, []);
 
-  const handleDistrictChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    setSelectedDistrict(val);
-    if (pathname === "/map" || pathname === "/districts") {
-      router.push(`${pathname}?district=${val}`);
-    } else if (pathname.startsWith("/farmer")) {
-      router.push(`/farmer?district=${val}`);
-    }
-  };
+  useEffect(() => setMenuOpen(false), [pathname]);
 
   if (pathname === "/") return <>{children}</>;
 
-  const groups: { key: NavItem["group"]; labelEn: string; labelMr: string }[] = [
-    { key: "operational", labelEn: "OPERATIONAL", labelMr: "कार्यप्रणाली" },
-    { key: "analysis", labelEn: "SCIENTIFIC ANALYSIS", labelMr: "वैज्ञानिक विश्लेषण" },
-    { key: "portals", labelEn: "USER PORTALS", labelMr: "पोर्टल्स" },
-    { key: "resources", labelEn: "RESOURCES", labelMr: "माहिती व स्रोत" },
-  ];
+  const chooseDistrict = (id: string) => {
+    setDistrict(id);
+    try {
+      localStorage.setItem(DISTRICT_KEY, id);
+    } catch {}
+    const q = new URLSearchParams(params.toString());
+    q.set("district", id);
+    router.push(`${pathname}?${q.toString()}`);
+  };
+
+  const geeLive = readiness?.gee?.available === true;
+  const status = apiDown ? "down" : !readiness ? "checking" : geeLive ? "live" : "offline";
 
   return (
-    <div className="min-h-screen bg-[var(--ground)] text-[var(--text)] flex flex-col">
-      {/* 64px Top Bar (Ruled T-Frame) */}
-      <header className="h-16 border-b border-[var(--border)] bg-[var(--ground)] sticky top-0 z-40 px-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="p-2 -ml-2 rounded lg:hidden text-[var(--secondary)] hover:text-[var(--text)]"
-            aria-label="Toggle navigation menu"
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+    <div className="sh">
+      <header className="sh-top">
+        <button type="button" className="sh-burger" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle navigation" aria-expanded={menuOpen}>
+          {menuOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
+        <Link href="/" className="sh-brand">
+          <StateMark className="sh-mark" />
+          <span>
+            <strong>DroughtLens</strong>
+            <small>{language === "mr" ? "महाराष्ट्र दुष्काळ गुप्तचर प्रणाली" : "Maharashtra Drought Intelligence"}</small>
+          </span>
+        </Link>
 
-          <Link href="/" className="flex items-center gap-2.5 text-decoration-none">
-            <StateMark className="w-9 h-8 text-[var(--aqua)]" />
-            <div className="hidden sm:block">
-              <span className="display font-bold text-lg tracking-tight text-[var(--text)] block leading-none">
-                DroughtLens
-              </span>
-              <span className="text-[13px] text-[var(--subtle)] font-normal leading-tight block">
-                {language === "mr" ? "महाराष्ट्र दुष्काळ गुप्तचर प्रणाली" : "Maharashtra Drought Intelligence"}
-              </span>
-            </div>
-          </Link>
-        </div>
-
-        {/* Center / Right controls: District Selector, Language Switcher, Telemetry, Auth */}
-        <div className="flex items-center gap-3">
-          {/* District Quick Select */}
-          <div className="hidden md:flex items-center gap-1.5 text-xs text-[var(--secondary)] bg-[var(--surface)] border border-[var(--border)] px-2.5 py-1.5 rounded">
-            <MapPin size={13} className="text-[var(--aqua)]" />
-            <select
-              value={selectedDistrict}
-              onChange={handleDistrictChange}
-              className="bg-transparent border-none text-[var(--text)] focus:outline-none cursor-pointer pr-2 font-medium"
-              aria-label={t("farmer.selectDistrict")}
-            >
+        <div className="sh-tools">
+          <label className="sh-district">
+            <MapPin size={16} aria-hidden />
+            <span className="sr-only">District</span>
+            <select value={district} onChange={(e) => chooseDistrict(e.target.value)}>
               {districts.map((d) => (
-                <option key={d.id} value={d.id} className="bg-[var(--surface)] text-[var(--text)]">
-                  {d.name} ({d.region})
+                <option key={d.id} value={d.id}>
+                  {d.name}
                 </option>
               ))}
             </select>
-          </div>
+          </label>
 
-          {/* Language Toggle */}
-          <div className="flex items-center bg-[var(--surface)] border border-[var(--border)] rounded p-0.5 text-xs font-medium">
-            <button
-              type="button"
-              onClick={() => setLanguage("mr")}
-              className={`px-2 py-1 rounded transition-colors ${
-                language === "mr"
-                  ? "bg-[var(--raised)] text-[var(--aqua)] font-semibold shadow-xs"
-                  : "text-[var(--secondary)] hover:text-[var(--text)]"
-              }`}
-              title="मराठी भाषा निवडा"
-            >
-              मराठी
-            </button>
-            <button
-              type="button"
-              onClick={() => setLanguage("en")}
-              className={`px-2 py-1 rounded transition-colors ${
-                language === "en"
-                  ? "bg-[var(--raised)] text-[var(--aqua)] font-semibold shadow-xs"
-                  : "text-[var(--secondary)] hover:text-[var(--text)]"
-              }`}
-              title="Select English Language"
-            >
+          <div className="sh-lang" role="group" aria-label="Language">
+            <button type="button" aria-pressed={language === "en"} onClick={() => setLanguage("en")}>
               EN
             </button>
+            <button type="button" aria-pressed={language === "mr"} onClick={() => setLanguage("mr")}>
+              मराठी
+            </button>
           </div>
 
-          {/* Infrastructure Health Badge */}
-          <div
-            className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded text-[13px] font-mono border border-[var(--border)] bg-[var(--surface)]"
-            title={`API: ${readiness?.status ?? "active"} | GEE: ${readiness?.gee?.available ? "connected" : "configured"} | DB: ${readiness?.database?.available ? "connected" : "offline"}`}
-          >
-            <span
-              className={`w-2 h-2 rounded-full ${
-                readiness?.gee?.available ? "bg-[var(--aqua)] animate-pulse" : readiness ? "bg-[var(--warning)]" : "bg-[var(--negative)]"
-              }`}
-            />
-            <span className="text-[var(--secondary)] font-sans">
-              {readiness?.gee?.available ? "GEE live" : readiness ? "GEE offline" : "API offline"}
+          <Link href="/admin" className={`sh-status is-${status}`} title={readiness?.gee?.message ?? undefined}>
+            <span className="sh-dot" />
+            <span className="sh-status-text">
+              {status === "live" ? "Earth Engine live" : status === "offline" ? "Earth Engine offline" : status === "down" ? "API unreachable" : "Checking…"}
+              <small>{lastSync ? `Last sync ${timeAgo(lastSync)}` : "No successful sync yet"}</small>
             </span>
-          </div>
+          </Link>
 
-          {/* Account Profile Link */}
-          <Link
-            href="/login"
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded border border-[var(--border)] bg-[var(--surface)] hover:bg-[var(--raised)] text-xs text-[var(--secondary)] hover:text-[var(--text)] transition-colors"
-            title="User Profile / Login"
-          >
-            <UserIcon size={14} className="text-[var(--aqua)]" />
-            <span className="hidden md:inline">{t("nav.account")}</span>
+          <Link href="/login" className="sh-account" aria-label={t("nav.account")}>
+            <UserIcon size={18} />
           </Link>
         </div>
       </header>
 
-      {/* T-Frame Body */}
-      <div className="flex flex-1">
-        {/* 230px Ruled Sidebar */}
-        <aside
-          className={`fixed lg:sticky top-16 z-30 w-[230px] h-[calc(100vh-64px)] bg-[var(--ground)] border-r border-[var(--border)] flex flex-col justify-between overflow-y-auto transition-transform lg:translate-x-0 ${
-            mobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-          }`}
-          aria-label="Main Navigation"
-        >
-          <nav className="p-3 space-y-5">
-            {groups.map((group) => {
-              const items = navItems.filter((i) => i.group === group.key);
-              if (items.length === 0) return null;
-              return (
-                <div key={group.key} className="space-y-1">
-                  <div className="px-2 text-[13px] font-mono font-semibold text-[var(--subtle)] tracking-wider">
-                    {language === "mr" ? group.labelMr : group.labelEn}
-                  </div>
-                  {items.map(({ href, labelKey, icon: Icon, badge }) => {
-                    const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+      <div className="sh-body">
+        <aside className={`sh-side ${menuOpen ? "is-open" : ""}`} aria-label="Main navigation">
+          <nav>
+            {GROUPS.map((g) => (
+              <div key={g.key} className="sh-group">
+                <p className="sh-group-label">{language === "mr" ? g.mr : g.en}</p>
+                {navItems
+                  .filter((i) => i.group === g.key)
+                  .map(({ href, labelKey, icon: Icon }) => {
+                    const active = pathname === href || pathname.startsWith(`${href}/`);
                     return (
-                      <Link
-                        key={href}
-                        href={href}
-                        onClick={() => setMobileMenuOpen(false)}
-                        className={`flex items-center justify-between px-3 py-2.5 rounded-md text-[15px] transition-colors ${
-                          isActive
-                            ? "bg-[var(--raised)] text-[var(--aqua)] font-semibold border-l-2 border-[var(--aqua)]"
-                            : "text-[var(--secondary)] hover:text-[var(--text)] hover:bg-[var(--surface)]"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon size={16} strokeWidth={isActive ? 2 : 1.7} />
-                          <span>{t(labelKey)}</span>
-                        </div>
-                        {badge && (
-                          <span className="px-1.5 py-0.5 rounded text-[13px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
-                            {badge}
-                          </span>
-                        )}
+                      <Link key={href} href={href} className={`sh-link ${active ? "is-active" : ""}`} aria-current={active ? "page" : undefined}>
+                        {active && <motion.span layoutId="sh-pill" className="sh-pill" transition={{ type: "spring", stiffness: 420, damping: 36 }} />}
+                        <Icon size={19} strokeWidth={active ? 2.2 : 1.8} />
+                        <span>{t(labelKey)}</span>
                       </Link>
                     );
                   })}
-                </div>
-              );
-            })}
+              </div>
+            ))}
           </nav>
-
-          {/* Sidebar Footer Metadata */}
-          <div className="p-3 border-t border-[var(--border)] text-[13px] text-[var(--subtle)] font-mono space-y-1">
-            <div className="flex justify-between items-center">
-              <span>GEE: {readiness?.gee?.project_id ?? "—"}</span>
-              <span className={readiness?.database?.available ? "text-[var(--aqua)]" : "text-[var(--warning)]"}>
-                DB {readiness?.database?.available ? "on" : "off"}
-              </span>
-            </div>
-            <div>{districts.filter((d) => d.boundary_available).length} districts with boundaries</div>
+          <div className="sh-side-foot">
+            <span>GEE project</span>
+            <strong>{readiness?.gee?.project_id ?? "—"}</strong>
+            <span>Database {readiness?.database?.available ? "connected" : "not running (file store)"}</span>
           </div>
         </aside>
+        {menuOpen && <div className="sh-scrim" onClick={() => setMenuOpen(false)} aria-hidden />}
 
-        {/* Mobile backdrop */}
-        {mobileMenuOpen && (
-          <div
-            onClick={() => setMobileMenuOpen(false)}
-            className="fixed inset-0 bg-black/60 z-20 lg:hidden"
-            aria-hidden="true"
-          />
-        )}
-
-        {/* Main Content Pane */}
-        <main className="flex-1 min-w-0 bg-[var(--ground)] overflow-y-auto">
-          {children}
+        <main className="sh-main">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
     </div>
   );
+}
+
+export function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <ShellInner>{children}</ShellInner>
+    </Suspense>
+  );
+}
+
+/** The district chosen in the top bar, read from the URL or the last choice. */
+export function useSelectedDistrict(fallback = "beed") {
+  const params = useSearchParams();
+  const [id, setId] = useState(fallback);
+  useEffect(() => {
+    let saved: string | null = null;
+    try {
+      saved = localStorage.getItem(DISTRICT_KEY);
+    } catch {}
+    setId(params.get("district") || saved || fallback);
+  }, [params, fallback]);
+  return id;
 }

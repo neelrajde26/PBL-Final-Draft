@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import socket
 import time
+from urllib.parse import urlsplit
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Iterator
@@ -42,7 +44,26 @@ class Database:
         # every request does not pay the connect timeout while the database is down.
         self._unavailable_until = 0.0
 
-    RETRY_AFTER_SECONDS = 30.0
+    RETRY_AFTER_SECONDS = 60.0
+
+    def _port_open(self) -> bool:
+        """Cheap TCP probe. Windows takes ~2 s per address to refuse a closed port, so probe first."""
+        try:
+            parts = urlsplit(self.settings.database_url.replace("+psycopg", ""))
+            if not parts.hostname:
+                return True
+            with socket.create_connection((parts.hostname, parts.port or 5432), timeout=0.3):
+                return True
+        except OSError:
+            return False
+
+    def _check_reachable(self) -> bool:
+        if time.monotonic() < self._unavailable_until:
+            return False
+        if not self._port_open():
+            self._unavailable_until = time.monotonic() + self.RETRY_AFTER_SECONDS
+            return False
+        return True
 
     class Unavailable(RuntimeError):
         pass
@@ -75,8 +96,8 @@ class Database:
 
     @contextmanager
     def session(self) -> Iterator[Session]:
-        if time.monotonic() < self._unavailable_until:
-            raise Database.Unavailable("Database marked unavailable; retrying later.")
+        if not self._check_reachable():
+            raise Database.Unavailable("Database not reachable; retrying later.")
         session = self.session_factory()()
         try:
             try:
@@ -95,8 +116,8 @@ class Database:
     def health(self) -> DatabaseHealth:
         if not self.configured:
             return DatabaseHealth(False, False, "DATABASE_URL is not configured.")
-        if time.monotonic() < self._unavailable_until:
-            return DatabaseHealth(True, False, "Database connection failed recently; retrying shortly.")
+        if not self._check_reachable():
+            return DatabaseHealth(True, False, "Database connection failed; inspect server availability and DATABASE_URL.")
         try:
             with self.engine().connect() as connection:
                 connection.execute(text("SELECT 1"))

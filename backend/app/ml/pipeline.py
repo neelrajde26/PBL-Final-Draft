@@ -216,7 +216,7 @@ def train_domain(df: pd.DataFrame, splits: Splits, t: Target) -> dict[str, Any] 
         "class_balance_train": round(float(train[ycol].mean()), 4),
         "validation_candidates": scores, "test_metrics": test_m, "baselines_test": base,
         "acceptance": {"rule": "test macro-F1 beats best baseline by >0.02 and PR-AUC beats prevalence by >0.05", "passed": bool(accepted), "status": "accepted" if accepted else "experimental"},
-        "feature_importance": importance, "calibration": calib, "artifact": str(artifact.relative_to(ROOT.parent)),
+        "feature_importance": importance, "calibration": calib, "artifact": str(artifact.relative_to(ROOT.parent)) if artifact.is_relative_to(ROOT.parent) else str(artifact),
     }
 
 
