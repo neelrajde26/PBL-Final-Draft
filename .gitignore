@@ -37,3 +37,4 @@ backend/data/boundaries/local/
 .taste-skill/
 backend/.env
 frontend/public/maplibre-gl-worker.mjs
+.claude/
