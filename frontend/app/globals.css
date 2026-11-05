@@ -7,8 +7,8 @@
   --text-sm: 0.9375rem;
   --text-sm--line-height: 1.5;
   --text-base: 1.0625rem;
-  --font-sans: var(--nf-text), "Figtree", system-ui, sans-serif;
-  --font-display: var(--nf-display), "League Spartan", system-ui, sans-serif;
+  --font-sans: var(--nf-text), var(--nf-deva), "Figtree", system-ui, sans-serif;
+  --font-display: var(--nf-display), var(--nf-deva), "League Spartan", system-ui, sans-serif;
 }
 
 :root {
@@ -39,7 +39,7 @@ body {
   min-width: 320px;
   background: var(--ground);
   color: var(--text);
-  font-family: var(--nf-text), "Figtree", system-ui, sans-serif;
+  font-family: var(--nf-text), var(--nf-deva), "Figtree", system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -413,7 +413,11 @@ button, a { -webkit-tap-highlight-color: transparent; }
   }
 }
 
-h1, h2, h3, .display { font-family: var(--nf-display), "League Spartan", sans-serif; letter-spacing: -0.02em; }
+h1, h2, h3, .display { font-family: var(--nf-display), var(--nf-deva), "League Spartan", sans-serif; letter-spacing: -0.02em; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }
+
+/* Devanagari needs more line height and no negative tracking. */
+html[lang="mr"] h1, html[lang="mr"] h2, html[lang="mr"] h3, html[lang="mr"] .display { letter-spacing: 0 !important; line-height: 1.2 !important; }
+html[lang="mr"] body { line-height: 1.65; }

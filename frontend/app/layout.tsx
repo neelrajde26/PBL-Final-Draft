@@ -4,11 +4,13 @@ import "./globals.css";
 import "./app.css";
 
 import type { Metadata } from "next";
-import { Figtree, League_Spartan } from "next/font/google";
+import { Figtree, League_Spartan, Mukta } from "next/font/google";
 import { Shell } from "@/components/shell";
+import { TranslateLayer } from "@/components/translate-layer";
 import { I18nProvider } from "@/lib/i18n";
 
 const display = League_Spartan({ subsets: ["latin"], weight: ["600", "700"], variable: "--nf-display" });
+const deva = Mukta({ subsets: ["devanagari", "latin"], weight: ["400", "600", "700"], variable: "--nf-deva" });
 const text = Figtree({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--nf-text" });
 
 export const metadata: Metadata = {
@@ -19,10 +21,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${display.variable} ${text.variable}`}>
+    <html lang="en" className={`${display.variable} ${text.variable} ${deva.variable}`}>
       <body>
         <I18nProvider>
           <Shell>{children}</Shell>
+          <TranslateLayer />
         </I18nProvider>
       </body>
     </html>

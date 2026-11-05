@@ -2,13 +2,13 @@
 html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-behavior: none; }
 
 .st { --m: clamp(20px, 5vw, 88px); position: fixed; inset: 0; background: #04131d; color: var(--text); overflow: hidden; }
-.st h1, .st h2, .st h3 { margin: 0; font-family: var(--nf-display), "League Spartan", sans-serif; }
+.st h1, .st h2, .st h3 { margin: 0; font-family: var(--nf-display), var(--nf-deva), "League Spartan", sans-serif; }
 .st p { margin: 0; }
 
 /* top bar */
 .st-top { position: fixed; inset: 0 0 auto 0; z-index: 60; display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 20px var(--m); pointer-events: none; }
 .st-top > * { pointer-events: auto; }
-.st-brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; color: var(--text); cursor: pointer; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.03em; }
+.st-brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; color: var(--text); cursor: pointer; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.03em; }
 .st-brand-mark { width: 38px; height: 32px; color: var(--aqua); filter: drop-shadow(0 0 12px rgba(84, 214, 189, 0.55)); }
 .st-counter { font-size: 16px; color: rgba(234, 244, 243, 0.8); padding: 8px 16px; border-radius: 999px; background: rgba(4, 19, 29, 0.45); backdrop-filter: blur(10px); }
 .st-counter b { color: var(--aqua); font-family: "JetBrains Mono", monospace; }
@@ -68,14 +68,14 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 .st-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-top: 48px; }
 .st-step { position: relative; overflow: hidden; padding: 30px 28px 32px; border-radius: 18px; background: rgba(16, 44, 60, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); min-height: 300px; display: flex; flex-direction: column; justify-content: flex-end; gap: 12px; }
 .st-step::before { content: ""; position: absolute; inset: 0 0 auto 0; height: 5px; background: var(--c); }
-.st-step-n { position: absolute; top: 14px; right: 22px; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: 7rem; line-height: 1; color: var(--c); opacity: 0.18; }
+.st-step-n { position: absolute; top: 14px; right: 22px; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; font-size: 7rem; line-height: 1; color: var(--c); opacity: 0.18; }
 .st-step h3 { font-size: clamp(2rem, 1.4rem + 1.2vw, 2.8rem); color: var(--c); }
 .st-step p { font-size: clamp(1.1rem, 1rem + 0.3vw, 1.3rem); line-height: 1.45; color: var(--text); }
 
 /* layers */
 .st-layers { display: grid; grid-template-columns: 1fr 1.35fr 0.9fr; gap: 40px; align-items: center; background: radial-gradient(ellipse at 55% 50%, #12485a 0%, #04131d 62%); }
 .st-layers-list ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-.st-layers-list button { background: none; border: 0; padding: 6px 0; cursor: pointer; text-align: left; font-family: var(--nf-display), sans-serif; font-weight: 700; letter-spacing: -0.03em; font-size: clamp(1.8rem, 1.2rem + 1.6vw, 3rem); line-height: 1.1; color: var(--subtle); transition: color 0.25s, transform 0.25s; }
+.st-layers-list button { background: none; border: 0; padding: 6px 0; cursor: pointer; text-align: left; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; letter-spacing: -0.03em; font-size: clamp(1.8rem, 1.2rem + 1.6vw, 3rem); line-height: 1.1; color: var(--subtle); transition: color 0.25s, transform 0.25s; }
 .st-layers-list button:hover { color: var(--secondary); }
 .st-layers-list button[aria-selected="true"] { color: var(--text); transform: translateX(10px); }
 .st-layers-list button[aria-selected="true"]::before { content: ""; display: inline-block; width: 14px; height: 14px; border-radius: 50%; background: var(--aqua); margin-right: 14px; vertical-align: 0.15em; box-shadow: 0 0 14px var(--aqua); }
@@ -89,7 +89,7 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 .st-real { background: linear-gradient(rgba(4, 19, 29, 0.82), rgba(4, 19, 29, 0.94)), url(/media/godavari-satellite.jpg) center / cover; }
 .st-real-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 48px; }
 .st-real-card { min-height: 34svh; padding: 30px; border-radius: 20px; display: flex; flex-direction: column; justify-content: space-between; gap: 16px; color: var(--ground); }
-.st-real-card strong { font-family: var(--nf-display), sans-serif; font-size: clamp(4.5rem, 2.5rem + 5vw, 8rem); line-height: 0.9; letter-spacing: -0.04em; }
+.st-real-card strong { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: clamp(4.5rem, 2.5rem + 5vw, 8rem); line-height: 0.9; letter-spacing: -0.04em; }
 .st-real-card .st-real-date { font-size: clamp(2.2rem, 1.4rem + 2vw, 3.4rem); display: block; line-height: 1; }
 .st-real-card > span { font-size: 20px; font-weight: 600; line-height: 1.3; }
 .st-real-card.is-aqua { background: linear-gradient(140deg, var(--aqua), var(--lime)); }
@@ -103,7 +103,7 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 .st-tool { display: grid; gap: 8px; padding: 22px; border-radius: 16px; text-decoration: none; color: var(--text); background: rgba(16, 44, 60, 0.75); border: 1px solid rgba(255, 255, 255, 0.08); transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.25s, background 0.25s; }
 .st-tool:hover { transform: translateY(-6px); border-color: var(--c); background: rgba(25, 59, 74, 0.9); }
 .st-tool-mark { width: 34px; height: 28px; color: var(--c); }
-.st-tool strong { font-family: var(--nf-display), sans-serif; font-size: 1.6rem; letter-spacing: -0.02em; }
+.st-tool strong { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: 1.6rem; letter-spacing: -0.02em; }
 .st-tool span { font-size: 17px; color: var(--secondary); }
 
 /* end */
@@ -112,7 +112,7 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 .st-cta:hover { filter: brightness(1.08) saturate(1.1); }
 .st-cta-note { font-size: clamp(1.1rem, 1rem + 0.5vw, 1.5rem); font-weight: 700; max-width: 30ch; }
 .st-cta-line { overflow: hidden; }
-.st-cta-word { font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: clamp(4.5rem, 16vw, 18rem); line-height: 0.82; letter-spacing: -0.06em; }
+.st-cta-word { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; font-size: clamp(4.5rem, 16vw, 18rem); line-height: 0.82; letter-spacing: -0.06em; }
 .st-foot { display: grid; gap: 14px; }
 .st-foot nav { display: flex; flex-wrap: wrap; gap: 10px 28px; }
 .st-foot nav a { color: var(--text); font-size: 18px; font-weight: 600; text-decoration: none; }
@@ -181,3 +181,9 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 }
 @media (prefers-reduced-motion: reduce) { .st-hero-photo, .st-hint span { animation: none; } }
 @keyframes lp-drift { from { transform: scale(1.02); } to { transform: scale(1.12) translate(-2%, 1%); } }
+
+.st-top-right { display: flex; align-items: center; gap: 10px; }
+.st-lang { display: flex; padding: 3px; border-radius: 999px; background: rgba(4, 19, 29, 0.5); border: 1px solid rgba(234, 244, 243, 0.3); backdrop-filter: blur(10px); }
+.st-lang button { border: 0; background: none; color: var(--secondary); font-weight: 700; font-size: 15px; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.st-lang button[aria-pressed="true"] { background: var(--aqua); color: var(--ground); }
+@media (max-width: 760px) { .st-lang button { padding: 6px 10px; font-size: 13px; } .st-top-cta { display: none; } }

@@ -43,7 +43,7 @@
 .ap-kpi { position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 8px; padding: 20px; border-radius: 10px; background: var(--surface); border: 1px solid var(--border); min-height: 150px; }
 .ap-kpi-top { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
 .ap-kpi-label { font-size: 15px; color: var(--secondary); font-weight: 500; }
-.ap-kpi-value { font-family: var(--nf-display), sans-serif; font-size: clamp(2.2rem, 1.6rem + 1.6vw, 3.2rem); line-height: 1; letter-spacing: -0.03em; margin-top: auto; }
+.ap-kpi-value { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: clamp(2.2rem, 1.6rem + 1.6vw, 3.2rem); line-height: 1; letter-spacing: -0.03em; margin-top: auto; }
 .ap-kpi-sub { font-size: 14px; color: var(--secondary); }
 .ap-kpi::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--border); }
 .ap-kpi-aqua::after { background: var(--aqua); }
@@ -113,7 +113,7 @@
 .sh-burger { display: none; background: none; border: 0; color: var(--text); cursor: pointer; padding: 6px; }
 .sh-brand { display: flex; align-items: center; gap: 12px; text-decoration: none; color: var(--text); }
 .sh-mark { width: 40px; height: 34px; color: var(--aqua); filter: drop-shadow(0 0 10px rgba(84, 214, 189, 0.4)); }
-.sh-brand strong { display: block; font-family: var(--nf-display), sans-serif; font-size: 22px; letter-spacing: -0.03em; line-height: 1; }
+.sh-brand strong { display: block; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: 22px; letter-spacing: -0.03em; line-height: 1; }
 .sh-brand small { display: block; font-size: 13px; color: var(--subtle); margin-top: 3px; }
 .sh-tools { margin-left: auto; display: flex; align-items: center; gap: 12px; }
 .sh-district { display: flex; align-items: center; gap: 8px; padding: 0 6px 0 14px; height: 42px; border-radius: 999px; background: var(--surface); border: 1px solid var(--control); color: var(--aqua); }
@@ -167,7 +167,7 @@
 .ov-facts dd { margin: 2px 0 0; font-size: 17px; font-weight: 600; }
 .ov-forecast { display: grid; gap: 8px; justify-items: start; padding: 18px; margin-bottom: 18px; border-radius: 10px; background: rgba(244, 187, 208, 0.08); border: 1px solid rgba(244, 187, 208, 0.3); }
 .ov-forecast-label { margin: 0; font-size: 15px; color: var(--secondary); }
-.ov-forecast-value { font-family: var(--nf-display), sans-serif; font-size: 3.4rem; line-height: 1; color: var(--pink); }
+.ov-forecast-value { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: 3.4rem; line-height: 1; color: var(--pink); }
 .ov-forecast-note, .ov-forecast-none { margin: 0; font-size: 14px; color: var(--secondary); }
 .ov-rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
 .ov-rank li { display: grid; grid-template-columns: 26px minmax(110px, 1fr) 2fr 52px; align-items: center; gap: 12px; font-size: 15px; }
@@ -181,7 +181,7 @@
 .bt-note { margin: 14px 0 0; font-size: 14px; color: var(--secondary); }
 .bt-cm { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .bt-cell { display: grid; gap: 6px; padding: 18px; border-radius: 10px; background: var(--raised); border-left: 4px solid; }
-.bt-cell strong { font-family: var(--nf-display), sans-serif; font-size: 2.4rem; line-height: 1; }
+.bt-cell strong { font-family: var(--nf-display), var(--nf-deva), sans-serif; font-size: 2.4rem; line-height: 1; }
 .bt-cell span { font-size: 14px; color: var(--secondary); }
 .bt-map-tools { display: flex; flex-wrap: wrap; gap: 12px; justify-content: space-between; margin-bottom: 12px; }
 .bt-map { width: 100%; height: auto; display: block; }
@@ -212,12 +212,12 @@
 .au-shape { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); }
 .au-mark { width: min(28vw, 340px); height: auto; color: var(--aqua); opacity: 0.85; filter: drop-shadow(0 0 40px rgba(84, 214, 189, 0.7)); }
 .au-quote { position: absolute; left: 48px; right: 48px; bottom: 48px; }
-.au-quote p { margin: 0; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: clamp(2.6rem, 1.5rem + 3vw, 4.6rem); line-height: 0.95; letter-spacing: -0.04em; background: linear-gradient(100deg, #fff 35%, var(--aqua) 75%, var(--lime)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.au-quote p { margin: 0; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; font-size: clamp(2.6rem, 1.5rem + 3vw, 4.6rem); line-height: 0.95; letter-spacing: -0.04em; background: linear-gradient(100deg, #fff 35%, var(--aqua) 75%, var(--lime)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .au-quote span { display: block; margin-top: 14px; font-size: 1.2rem; color: #dbeeea; max-width: 34ch; }
 .au-main { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px; padding: 48px 24px; position: relative; }
 .au-main > div { width: 100%; max-width: 480px; }
 .au-main > div > * { margin-left: auto !important; margin-right: auto !important; }
-.au-brand { position: absolute; top: 28px; left: 32px; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: 24px; }
+.au-brand { position: absolute; top: 28px; left: 32px; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-family: var(--nf-display), var(--nf-deva), sans-serif; font-weight: 700; font-size: 24px; }
 .au-skip { color: var(--secondary); font-size: 16px; text-decoration: none; }
 .au-skip:hover { color: var(--aqua); }
 .au input { font-size: 17px !important; min-height: 50px; }

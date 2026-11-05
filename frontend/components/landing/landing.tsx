@@ -7,6 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CountUp, FilmGrain, Rain, TitleSequence } from "@/components/landing/cinema";
 import { stateShape, StateMark } from "@/components/landing/state-mark";
 import { getDistrictIndicators, getDistricts, getReadiness, type IndicatorCollection } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 import { useLoad } from "@/lib/use-load";
 import "./cinema.css";
 import "./story.css";
@@ -311,6 +312,7 @@ function EndChapter() {
 
 export function Landing() {
   const reduce = useReducedMotion() ?? false;
+  const { language, setLanguage } = useI18n();
   const [intro, setIntro] = useState(true);
   const [[index, dir], setPage] = useState<[number, number]>([0, 1]);
   const lockUntil = useRef(0);
@@ -403,7 +405,13 @@ export function Landing() {
         <span className="st-counter" aria-live="polite">
           <b>{String(index + 1).padStart(2, "0")}</b> / {CHAPTERS.length} · {CHAPTERS[index]}
         </span>
-        <Link href="/overview" className="st-top-cta">Open dashboard</Link>
+        <div className="st-top-right">
+          <div className="st-lang" role="group" aria-label="Language">
+            <button type="button" aria-pressed={language === "en"} onClick={() => setLanguage("en")}>EN</button>
+            <button type="button" aria-pressed={language === "mr"} onClick={() => setLanguage("mr")} translate="no">मराठी</button>
+          </div>
+          <Link href="/overview" className="st-top-cta">Open dashboard</Link>
+        </div>
       </header>
 
       <main className="st-stage">
