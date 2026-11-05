@@ -187,3 +187,9 @@ html.st-lock, html.st-lock body { overflow: hidden; height: 100%; overscroll-beh
 .st-lang button { border: 0; background: none; color: var(--secondary); font-weight: 700; font-size: 15px; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
 .st-lang button[aria-pressed="true"] { background: var(--aqua); color: var(--ground); }
 @media (max-width: 760px) { .st-lang button { padding: 6px 10px; font-size: 13px; } .st-top-cta { display: none; } }
+
+/* Marathi words are longer: keep the hero headline to two lines. */
+html[lang="mr"] .st-h1 { font-size: clamp(3.2rem, 1.6rem + 5.4vw, 7.4rem); line-height: 1.1 !important; }
+html[lang="mr"] .st-month-name { font-size: clamp(4rem, 2rem + 7vw, 9rem); line-height: 1.1 !important; }
+html[lang="mr"] .st-h2 { font-size: clamp(2.2rem, 1.3rem + 2.8vw, 4.2rem); }
+@media (max-width: 760px) { html[lang="mr"] .st-h1 { font-size: 13vw; } }

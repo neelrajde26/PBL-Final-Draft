@@ -284,7 +284,7 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
             <p className="text-[var(--secondary)] line-clamp-2">
               {readiness?.database.available
                 ? "PostGIS spatial engine active on port 5432."
-                : "Database offline; local GeoJSON & SQLite active."}
+                : "Database offline; serving stored files from backend/data."}
             </p>
           </div>
 

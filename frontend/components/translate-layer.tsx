@@ -36,7 +36,9 @@ const WORDS: Record<string, string> = {
   "increasing stress": "वाढता ताण", succeeded: "यशस्वी", failed: "अयशस्वी", accepted: "स्वीकृत", experimental: "प्रायोगिक",
   "Latest month": "नवीनतम महिना", "Last sync": "शेवटचे समक्रमण", "Last job": "शेवटचे काम", "Target month": "लक्ष्य महिना",
   Overview: "आढावा", latest: "नवीनतम", daily: "दैनिक", monthly: "मासिक", incremental: "वाढीव", sync: "समक्रमण",
-  "z-score": "z-गुण", Forecasts: "अंदाज", Districts: "जिल्हे",
+  "z-score": "z-गुण", Forecasts: "अंदाज", Districts: "जिल्हे", "Event ID": "घटना क्रमांक", Terminated: "समाप्त",
+  Region: "विभाग", Onset: "सुरुवात", Index: "निर्देशांक", meteorological: "हवामानशास्त्रीय", agricultural: "कृषी", hydrological: "जलशास्त्रीय",
+  error: "त्रुटी", "Mild Dry": "सौम्य कोरडे",
   "Earth Engine": "Earth Engine",
 };
 const WORD_RE = new RegExp(
