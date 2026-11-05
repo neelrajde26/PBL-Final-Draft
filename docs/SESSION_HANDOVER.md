@@ -50,3 +50,10 @@ The API picks them up without a restart.
 2. Generate the hero NDVI animation from Earth Engine (`getVideoThumbURL`) into `frontend/public/media/sat/`.
 3. Move remaining pages onto `Panel`/`Kpi` components; Models page should read `/api/models/report`.
 4. Persist extracts into PostgreSQL when the database is available; register `refresh.py` with Celery beat.
+
+## Accounts
+
+Users live in `backend/data/auth/users.json` (Argon2 hashes only, gitignored). On first start the
+API creates an admin from `MDIS_ADMIN_EMAIL` / `MDIS_ADMIN_PASSWORD`; if those are unset it writes a
+one-time password to `backend/data/auth/initial_admin.txt`. The JWT signing key comes from
+`AUTH_SECRET`, or is generated once into `backend/data/auth/.signing_secret`.

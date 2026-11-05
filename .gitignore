@@ -38,3 +38,4 @@ backend/data/boundaries/local/
 backend/.env
 frontend/public/maplibre-gl-worker.mjs
 .claude/
+backend/data/auth/

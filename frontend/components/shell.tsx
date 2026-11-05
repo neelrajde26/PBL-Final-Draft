@@ -58,6 +58,8 @@ const navItems: NavItem[] = [
   { href: "/methodology", labelKey: "nav.methodology", icon: BookOpen, group: "about" },
 ];
 
+const AUTH_ROUTES = new Set(["/login", "/register", "/forgot-password"]);
+
 const GROUPS: { key: NavItem["group"]; en: string; mr: string }[] = [
   { key: "monitor", en: "Monitor", mr: "निरीक्षण" },
   { key: "forecast", en: "Forecast & evaluate", mr: "अंदाज व मूल्यमापन" },
@@ -97,6 +99,29 @@ function ShellInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   if (pathname === "/") return <>{children}</>;
+  if (AUTH_ROUTES.has(pathname)) {
+    return (
+      <div className="au">
+        <aside className="au-art" aria-hidden>
+          <motion.div className="au-photo" initial={{ scale: 1.15, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }} />
+          <motion.div className="au-shape" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1.2, delay: 0.3 }}>
+            <StateMark className="au-mark" />
+          </motion.div>
+          <div className="au-quote">
+            <p>Drought, seen early.</p>
+            <span>Satellite drought warnings for all 36 districts of Maharashtra.</span>
+          </div>
+        </aside>
+        <div className="au-main">
+          <Link href="/" className="au-brand"><StateMark className="sh-mark" /> DroughtLens</Link>
+          <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}>
+            {children}
+          </motion.div>
+          <Link href="/overview" className="au-skip">Continue without signing in →</Link>
+        </div>
+      </div>
+    );
+  }
 
   const chooseDistrict = (id: string) => {
     storeDistrict(id);

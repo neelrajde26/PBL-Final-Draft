@@ -1,3 +1,5 @@
+import os
+
 from fastapi.testclient import TestClient
 
 from app.main import app
@@ -31,8 +33,8 @@ def test_auth_workflow() -> None:
     login_admin = client.post(
         "/api/auth/login",
         json={
-            "email": "admin@mdis.gov.in",
-            "password": "AdminSecurePass123!",
+            "email": os.environ["MDIS_ADMIN_EMAIL"],
+            "password": os.environ["MDIS_ADMIN_PASSWORD"],
         },
     )
     assert login_admin.status_code == 200

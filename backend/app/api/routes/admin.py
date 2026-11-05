@@ -60,6 +60,7 @@ def toggle_user_status(
     if not target:
         raise HTTPException(status_code=404, detail="User not found.")
     target.is_active = req.is_active
+    user_repository.save()
     return {"status": "success", "user": target.to_dict()}
 
 

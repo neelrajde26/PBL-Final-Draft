@@ -20,7 +20,7 @@ Three distinct authorization tiers are enforced via FastAPI dependency injection
 |---|---|---|
 | `FARMER` | View dashboards, map, historical data, district profiles, receive localized advisories, submit ground-truth field reports. | Public registration defaults strictly to `FARMER`. |
 | `RESEARCHER` | All Farmer privileges + raw satellite reduction queries, advanced ML model registry inspection, batch GeoJSON/CSV exports, and inference execution. | Provisioned by Admin. |
-| `ADMIN` | All privileges + system user management, activation toggles, background pipeline orchestration triggers, and raw health telemetry. | Bootstrap script only (`admin@mdis.gov.in`); public signup impossible. |
+| `ADMIN` | All privileges + system user management, activation toggles, background pipeline orchestration triggers, and raw health telemetry. | Created on first start from `MDIS_ADMIN_EMAIL` / `MDIS_ADMIN_PASSWORD`, or with a one-time random password written to `backend/data/auth/initial_admin.txt` (gitignored). Public signup cannot create admins. |
 
 ---
 

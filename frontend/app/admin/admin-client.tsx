@@ -20,6 +20,7 @@ import {
 import { useEffect, useState } from "react";
 
 import type { GeeHealth, Readiness } from "@/lib/api";
+import { getApiBase } from "@/lib/api";
 import { useI18n } from "@/lib/i18n";
 
 type Props = {
@@ -90,48 +91,21 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
   // Load real users on mount
   useEffect(() => {
     let active = true;
-    fetch("http://127.0.0.1:8000/api/admin/users", {
-      headers: {
-        Authorization: "Bearer mock-admin-token", // handled gracefully
-      },
-    })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (!active || !data) return;
-        setUsers(data.items || []);
+    // Uses the session cookie set at sign-in; only administrators get the list.
+    fetch(`${getApiBase()}/admin/users`, { credentials: "include" })
+      .then((res) => {
+        if (res.status === 401 || res.status === 403) throw new Error("auth");
+        return res.ok ? res.json() : Promise.reject(new Error("api"));
       })
-      .catch(() => {
-        // Fallback default admin users if unauthenticated in preview
-        if (active) {
-          setUsers([
-            {
-              id: "usr-admin-01",
-              email: "admin@mdis.gov.in",
-              full_name: "MDIS Principal Administrator",
-              role: "ADMIN",
-              is_active: true,
-              created_at: "2024-01-15T00:00:00Z",
-            },
-            {
-              id: "usr-patil-01",
-              email: "dr.patil@iitb.ac.in",
-              full_name: "Dr. Aniruddha Patil",
-              role: "RESEARCHER",
-              is_active: true,
-              created_at: "2024-03-22T00:00:00Z",
-            },
-            {
-              id: "usr-farmer-01",
-              email: "ramesh.k@farmer.mdis.in",
-              full_name: "Ramesh Keshavrao Patil",
-              role: "FARMER",
-              is_active: true,
-              district_id: "beed",
-              taluka: "Ashti",
-              created_at: "2024-06-01T00:00:00Z",
-            },
-          ]);
-        }
+      .then((data) => {
+        if (!active) return;
+        setUsers(data.items || []);
+        setUserError(null);
+      })
+      .catch((e: Error) => {
+        if (!active) return;
+        setUsers([]);
+        setUserError(e.message === "auth" ? "Sign in with an administrator account to manage users." : "The user service did not answer.");
       })
       .finally(() => {
         if (active) setLoadingUsers(false);
@@ -578,7 +552,12 @@ export function AdminClient({ readiness, geeHealth: initialGeeHealth }: Props) {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border border-[var(--border)]">
+          {userError && (
+              <p style={{ fontSize: 16, color: "var(--secondary)", margin: "8px 0 16px" }}>
+                {userError} <a href="/login" style={{ color: "var(--aqua)" }}>Sign in</a>
+              </p>
+            )}
+            <table className="w-full text-left text-xs border border-[var(--border)]">
             <thead className="bg-[var(--ground)] text-[var(--secondary)] font-mono uppercase tracking-wider">
               <tr>
                 <th className="p-3 border-b border-[var(--border)]">User Name</th>

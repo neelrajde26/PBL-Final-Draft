@@ -204,3 +204,37 @@
   .ap-panel-head { flex-direction: column; gap: 8px; }
   .ov-rank li { grid-template-columns: 22px 1fr 60px 46px; gap: 8px; }
 }
+
+/* ---------- sign-in / register ---------- */
+.au { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; background: #04131d; }
+.au-art { position: relative; overflow: hidden; }
+.au-photo { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(4, 19, 29, 0.2), rgba(4, 19, 29, 0.85)), url(/media/iss-mumbai-goa-night.jpg) center 35% / cover; }
+.au-shape { position: absolute; left: 50%; top: 42%; transform: translate(-50%, -50%); }
+.au-mark { width: min(28vw, 340px); height: auto; color: var(--aqua); opacity: 0.85; filter: drop-shadow(0 0 40px rgba(84, 214, 189, 0.7)); }
+.au-quote { position: absolute; left: 48px; right: 48px; bottom: 48px; }
+.au-quote p { margin: 0; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: clamp(2.6rem, 1.5rem + 3vw, 4.6rem); line-height: 0.95; letter-spacing: -0.04em; background: linear-gradient(100deg, #fff 35%, var(--aqua) 75%, var(--lime)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.au-quote span { display: block; margin-top: 14px; font-size: 1.2rem; color: #dbeeea; max-width: 34ch; }
+.au-main { display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 28px; padding: 48px 24px; position: relative; }
+.au-main > div { width: 100%; max-width: 480px; }
+.au-main > div > * { margin-left: auto !important; margin-right: auto !important; }
+.au-brand { position: absolute; top: 28px; left: 32px; display: flex; align-items: center; gap: 10px; color: var(--text); text-decoration: none; font-family: var(--nf-display), sans-serif; font-weight: 700; font-size: 24px; }
+.au-skip { color: var(--secondary); font-size: 16px; text-decoration: none; }
+.au-skip:hover { color: var(--aqua); }
+.au input { font-size: 17px !important; min-height: 50px; }
+.au button[type="submit"] { font-size: 18px !important; min-height: 54px; }
+.au label { font-size: 15.5px !important; }
+@media (max-width: 900px) {
+  .au { grid-template-columns: 1fr; }
+  .au-art { min-height: 34vh; }
+  .au-shape { display: none; }
+  .au-quote { left: 20px; right: 20px; bottom: 20px; }
+  .au-quote p { font-size: 2.4rem; }
+  .au-brand { position: static; }
+  .au-main { justify-content: flex-start; padding-top: 28px; }
+}
+.au-main > div > * { min-height: 0 !important; }
+.au { height: 100vh; }
+.au-main { overflow-y: auto; }
+@media (max-width: 900px) { .au { height: auto; } }
+.au-main { justify-content: safe center; padding-top: 100px; }
+@media (max-width: 900px) { .au-main { padding-top: 28px; } }
